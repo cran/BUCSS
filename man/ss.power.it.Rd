@@ -51,107 +51,100 @@ Suggested per-group sample size for planned study
   a sample effect size at face value or rely on sample size only.
 }
 \details{
-Researchers often use the sample effect size from a prior study as
-  an estimate of the likely size of an expected future effect in sample size
-  planning. However, sample effect size estimates should not usually be used
-  at face value to plan sample size, due to both publication bias and
+Researchers often use the sample effect size from a prior study as 
+  an estimate of the likely size of an expected future effect in sample size 
+  planning. However, sample effect size estimates should not usually be used 
+  at face value to plan sample size, due to both publication bias and 
   uncertainty.
-
-  The approach implemented in \code{ss.power.it} uses the observed
-  \eqn{t}-value and sample size from a previous study to correct the
-  noncentrality parameter associated with the effect of interest for
-  publication bias and/or uncertainty. This new estimated noncentrality
-  parameter is then used to calculate the necessary per-group sample size to
+  
+  The approach implemented in \code{ss.power.it} uses the observed 
+  \eqn{t}-value and sample size from a previous study to correct the 
+  noncentrality parameter associated with the effect of interest for 
+  publication bias and/or uncertainty. This new estimated noncentrality 
+  parameter is then used to calculate the necessary per-group sample size to 
   achieve the desired level of power in the planned study.
-
-  The approach uses the following likelihood function:
-  \deqn{f_{L}[f_{S};\nu_{1},\nu_{2},\omega]=\frac{f_{F}[f_{S}|\nu_{1},\nu_{2},
-  \omega]}{1-F_{F}[f_{crit}(1-\alpha_{S})|\nu_{1},\nu_{2},\omega]}} to
-  select an appropriate estimated noncentrality parameter. The formula
-  represents the density of a truncated noncentral \eqn{F}-distribution,
-  where \eqn{f_{F}} is the probability density function of the noncentral
-  \eqn{F}-distribution from the original study, \eqn{f_{S}} is the observed
-  \eqn{F}-value for the original study, \eqn{F_{F}} is the cumulative
-  distribution function indicating the probability that a noncentral
-  \eqn{F}-distribution exceeds the critical value, \eqn{f_{crit}} is the
-  critical \eqn{F}-value for \eqn{\alpha_{s}}, the specified
-  \eqn{\alpha}-level of the original study, \eqn{\nu_{1}} and \eqn{\nu_{2}}
-  are the degrees of freedom of the previous study, and \eqn{\omega} is the
-  noncentrality parameter being estimated for sample size planning. The
-  numerator is the likelihood of obtaining the observed previous study
-  \eqn{F}-value given the noncentrality parameter. The denominator can be
-  thought of as the power of the test given the specified noncentrality
-  parameter. In the two-group case, this formula reduces to the density of a
-  truncated noncentral \eqn{t}-distribution.
-
-  Assurance is the proportion of times that power will be at or above the
-  desired level, if the experiment were to be reproduced many times. For
-  example, assurance = .5 means that power will be above the desired level
-  half of the time, but below the desired level the other half of the time.
+  
+  The approach uses a likelihood function of a truncated non-central F 
+  distribution, where the truncation occurs due to small effect sizes being 
+  unobserved due to publication bias. The numerator of the likelihood
+  function is simply the density of a noncentral F distribution. The
+  denominator is the power of the test, which serves to truncate the
+  distribution. In the two-group case, this formula reduces to the density of
+  a truncated noncentral \eqn{t}-distribution.(See Taylor & Muller, 1996,
+  Equation 2.1. and Anderson & Maxwell, in press, for more details.)
+  
+  Assurance is the proportion of times that power will be at or above the 
+  desired level, if the experiment were to be reproduced many times. For 
+  example, assurance = .5 means that power will be above the desired level 
+  half of the time, but below the desired level the other half of the time. 
   Selecting assurance = .5 (selecting the noncentrality parameter at the 50th
-  percentile of the likelihood distribution) results in a median-unbiased
-  estimate of the population noncentrality parameter and corrects for
-  publication bias only. In order to correct for uncertainty, assurance > .5
+  percentile of the likelihood distribution) results in a median-unbiased 
+  estimate of the population noncentrality parameter and corrects for 
+  publication bias only. In order to correct for uncertainty, assurance > .5 
   can be selected, which corresponds to selecting the noncentrality parameter
-  associated with the (1 - assurance) quantile of the likelihood
+  associated with the (1 - assurance) quantile of the likelihood 
   distribution.
-
-  If the previous study of interest is unpublished (e.g., a pilot study),
-  \code{alpha.prior} can be set to 1 to indicate no publication bias.
-  Alternative \eqn{\alpha}-levels can also be accommodated to represent
-  differing amounts of publication bias. For example, setting
-  \code{alpha.prior}=.20 would reflect less severe publication bias than the
-  default of .05. In essence, setting \code{alpha.prior} at .20 assumes that
-  studies with \eqn{p}-values less than .20 are published, whereas those with
-  alrger \eqn{p}-values are not.
-
-  In some cases, the corrected noncentrality parameter for a given level of
-  assurance will be estimated to be zero. This is an indication that the
-  previous study's effect cannot be accurately estimated due to high levels
-  of uncertainty and bias. When this happens, subsequent sample size planning
-  is not possible with the chosen specifications. Two alternatives are
-  recommended. First, users can select a lower value of assurance (e.g. .5
-  instead of .8). Second, users can reduce the influence of publciation bias
-  by setting \code{alpha.prior} at a value greater than .05. It is possible
-  to correct for uncertainty only by setting \code{alpha.prior}=1 and
-  choosing the desired level of assurance.
-
-  \code{ss.power.it} assumes that the planned study will have equal n.
-  Unequal n in the previous study is handled in the following way for the
-  independent-t. If the user enters an odd value for N, no information is
+  
+  If the previous study of interest has not been subjected to publication
+  bias (e.g., a pilot study), \code{alpha.prior} can be set to 1 to indicate
+  no publication bias. Alternative \eqn{\alpha}-levels can also be
+  accommodated to represent differing amounts of publication bias. For
+  example, setting \code{alpha.prior}=.20 would reflect less severe
+  publication bias than the default of .05. In essence, setting
+  \code{alpha.prior} at .20 assumes that studies with \eqn{p}-values less
+  than .20 are published, whereas those with alrger \eqn{p}-values are not.
+  
+  In some cases, the corrected noncentrality parameter for a given level of 
+  assurance will be estimated to be zero. This is an indication that, at the 
+  desired level of assurance, the previous study's effect cannot be 
+  accurately estimated due to high levels of uncertainty and bias. When this 
+  happens, subsequent sample size planning is not possible with the chosen 
+  specifications. Two alternatives are recommended. First, users can select a
+  lower value of assurance (e.g. .8 instead of .95). Second, users can reduce
+  the influence of publciation bias by setting \code{alpha.prior} at a value 
+  greater than .05. It is possible to correct for uncertainty only by setting
+  \code{alpha.prior}=1 and choosing the desired level of assurance. We 
+  encourage users to make the adjustments as minimal as possible.
+  
+  \code{ss.power.it} assumes that the planned study will have equal n. 
+  Unequal n in the previous study is handled in the following way for the 
+  independent-t. If the user enters an odd value for N, no information is 
   available on the exact group sizes. The function calculates n by dividing N
-  by 2 and both rounding up and rounding down the result. The suggested
-  sample size for the planned study is calculated using both of these values
-  of n, and the function returns the larger of these two suggestions, t be
-  conservative. If the user enters a vector for n with two different values,
-  specific information is available on the exact group sizes. n is calcualted
-  as the harmonic mean of these two values (a measure of effective sample
-  size). Again, this is rounded both up and down. The suggested sample size
-  for the planned study is calculated using both of these values of n, and
-  the function returns the larger of these two suggestions, to be
-  conservative.
+  by 2 and both rounding up and rounding down the result, thus assuming equal
+  n. The suggested sample size for the planned study is calculated using both
+  of these values of n, and the function returns the larger of these two 
+  suggestions, t be conservative. If the user enters a vector for n with two 
+  different values, specific information is available on the exact group 
+  sizes. n is calcualted as the harmonic mean of these two values (a measure 
+  of effective sample size). Again, this is rounded both up and down. The 
+  suggested sample size for the planned study is calculated using both of 
+  these values of n, and the function returns the larger of these two 
+  suggestions, to be conservative. When the individual group sizes of an 
+  unequal-n previous study are known, we highly encourage entering these 
+  explicitly, especially if the sample sizes are quite discrepant, as this 
+  allows for the greatest precision in estimating an appropriate planned 
+  study n.
 }
 \examples{
 ss.power.it(t.observed=3, n=20, alpha.prior=.05, alpha.planned=.05,
 assurance=.80, power=.80, step=.001)
 
 }
-\author{
-Samantha F. Anderson \email{sander10@nd.edu},
-Ken Kelley \email{kkelley@nd.edu}
-}
 \references{
-Anderson, S. F., & Maxwell, S. E. (conditionally accepted).
+Anderson, S. F., & Maxwell, S. E. (in press).
   Addressing the 'replication crisis': Using original studies to design
   replication studies with appropriate statistical power. \emph{Multivariate
   Behavioral Research}.
 
-  Anderson, S. F., Kelley, K., & Maxwell, S. E. (under review). The illusion
-  of intended statistical power: How to avoid underpowered studies via
-  effective sample size planning.
+  Anderson, S. F., Kelley, K., & Maxwell, S. E. (under review). Sample size
+  planning for more accurate statistical power: A method correcting sample 
+  effect sizes for uncertainty and publication bias.
 
   Taylor, D. J., & Muller, K. E. (1996). Bias in linear model power and
   sample size calculation due to estimating noncentrality.
   \emph{Communications in Statistics: Theory and Methods, 25,} 1595-1610.
 }
-
+\author{
+Samantha F. Anderson \email{sander10@nd.edu},
+Ken Kelley \email{kkelley@nd.edu}
+}
