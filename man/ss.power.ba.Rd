@@ -131,20 +131,21 @@ alpha.prior=.05, alpha.planned=.05, assurance=.80, power=.80, step=.001)
 
 }
 \references{
-Anderson, S. F., & Maxwell, S. E. (in press).
+Anderson, S. F., & Maxwell, S. E. (2017).
   Addressing the 'replication crisis': Using original studies to design
   replication studies with appropriate statistical power. \emph{Multivariate
-  Behavioral Research}.
+  Behavioral Research, 52,} 305-322.
 
-  Anderson, S. F., Kelley, K., & Maxwell, S. E. (under review). Sample size
+  Anderson, S. F., Kelley, K., & Maxwell, S. E. (2017). Sample size
   planning for more accurate statistical power: A method correcting sample 
-  effect sizes for uncertainty and publication bias.
+  effect sizes for uncertainty and publication bias. \emph{Psychological 
+  Science, 28,} 1547-1562.
 
   Taylor, D. J., & Muller, K. E. (1996). Bias in linear model power and
   sample size calculation due to estimating noncentrality.
   \emph{Communications in Statistics: Theory and Methods, 25,} 1595-1610.
 }
 \author{
-Samantha F. Anderson \email{sander10@nd.edu},
+Samantha F. Anderson \email{samantha.f.anderson@asu.edu},
 Ken Kelley \email{kkelley@nd.edu}
 }
