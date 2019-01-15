@@ -1,10 +1,13 @@
-b977c55772e4fbf95c94c10bdbd238c9 *DESCRIPTION
-005fc3ec5b9c4584168196044b80255a *NAMESPACE
+c8950d39611063f9c235459226694d95 *DESCRIPTION
+f15171b479bccacda4912bbb3c300470 *NAMESPACE
 8a9937f685d7345acfbfec1d3b1f74f7 *R/BUCSS.R
 db339df25c058b5fddb7a8f731e72222 *R/ss.power.ba.R
 2ea19760f5b63fa695fb0f85ee7ddb2b *R/ss.power.ba.general.R
 f98691c5204ea4e57a03182bd731fc55 *R/ss.power.dt.r
 dd3254a83b209a16d4399f156ec39fc4 *R/ss.power.it.R
+dbbfbeffc8ad1198cde4e0a3c9b1a49f *R/ss.power.reg.all.R
+e9f4ec345ceba9f5f94de7d16c2e4a1c *R/ss.power.reg.joint.R
+0704d32431f1c0aa68a9644fb68e1fae *R/ss.power.reg1.R
 9a480e76c6c6c08674dcf024c0cc4680 *R/ss.power.spa.general.R
 6af3745b21f2d5543f4fa3aeab1f46b2 *R/ss.power.spa.r
 6222830cf00155003c2d5c74e89d24cd *R/ss.power.wa.general.R
@@ -14,6 +17,9 @@ c0c1bdedc6848dca225b9ac5e8052b18 *man/ss.power.ba.Rd
 d56a8543ce4912bd4531d056947b9e40 *man/ss.power.ba.general.Rd
 0cebc7360bd39b5653b37747bc00829b *man/ss.power.dt.Rd
 440347209fe278f61b6b91c58d2fdb6d *man/ss.power.it.Rd
+8177fba45b05be9966ca4606117b1d57 *man/ss.power.reg.all.Rd
+0e4f0ec1c2dc7e2836fc1ca0d325fa5f *man/ss.power.reg.joint.Rd
+137a2238c171d899f3d7efad0fc31f47 *man/ss.power.reg1.Rd
 f968a996f1e5368382a68d94ef862b3a *man/ss.power.spa.Rd
 9f21efc22660284ad96afc90e93af6ea *man/ss.power.spa.general.Rd
 23cf5a51abefd5721268e24392f1ecb1 *man/ss.power.wa.Rd
