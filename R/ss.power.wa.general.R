@@ -12,42 +12,44 @@
 #'   corrected for publication bias and/or uncertainty to provide a sample size
 #'   that will achieve more accurate statistical power for a planned study, when
 #'   compared to approaches that use a sample effect size at face value or rely
-#'   on sample size only.
+#'   on sample size only. The bias and uncertainty adjusted previous study
+#'   noncentrality parameter is also returned, which can be transformed to
+#'   various effect size metrics.
 #'
-#' @details Researchers often use the sample effect size from a prior study as 
-#'   an estimate of the likely size of an expected future effect in sample size 
-#'   planning. However, sample effect size estimates should not usually be used 
-#'   at face value to plan sample size, due to both publication bias and 
+#' @details Researchers often use the sample effect size from a prior study as
+#'   an estimate of the likely size of an expected future effect in sample size
+#'   planning. However, sample effect size estimates should not usually be used
+#'   at face value to plan sample size, due to both publication bias and
 #'   uncertainty.
-#'   
-#'   The approach implemented in \code{ss.power.wa.general} uses the observed 
-#'   \eqn{F}-value and sample size from a previous study to correct the 
-#'   noncentrality parameter associated with the effect of interest for 
-#'   publication bias and/or uncertainty. This new estimated noncentrality 
-#'   parameter is then used to calculate the necessary per-group sample size to 
+#'
+#'   The approach implemented in \code{ss.power.wa.general} uses the observed
+#'   \eqn{F}-value and sample size from a previous study to correct the
+#'   noncentrality parameter associated with the effect of interest for
+#'   publication bias and/or uncertainty. This new estimated noncentrality
+#'   parameter is then used to calculate the necessary per-group sample size to
 #'   achieve the desired level of power in the planned study.
-#'   
-#'   The approach uses a likelihood function of a truncated non-central F 
-#'   distribution, where the truncation occurs due to small effect sizes being 
-#'   unobserved due to publication bias. The numerator of the likelihood 
-#'   function is simply the density of a noncentral F distribution. The 
-#'   denominator is the power of the test, which serves to truncate the 
-#'   distribution. Thus, the ratio of the numerator and the denominator is a 
-#'   truncated noncentral F distribution. (See Taylor & Muller, 1996, Equation 
-#'   2.1. and Anderson & Maxwell, in press, for more details.)
-#'   
-#'   Assurance is the proportion of times that power will be at or above the 
-#'   desired level, if the experiment were to be reproduced many times. For 
+#'
+#'   The approach uses a likelihood function of a truncated non-central F
+#'   distribution, where the truncation occurs due to small effect sizes being
+#'   unobserved due to publication bias. The numerator of the likelihood
+#'   function is simply the density of a noncentral F distribution. The
+#'   denominator is the power of the test, which serves to truncate the
+#'   distribution. Thus, the ratio of the numerator and the denominator is a
+#'   truncated noncentral F distribution. (See Taylor & Muller, 1996, Equation
+#'   2.1. and Anderson & Maxwell, 2017 for more details.)
+#'
+#'   Assurance is the proportion of times that power will be at or above the
+#'   desired level, if the experiment were to be reproduced many times. For
 #'   example, assurance = .5 means that power will be above the desired level
-#'   half of the time, but below the desired level the other half of the time. 
+#'   half of the time, but below the desired level the other half of the time.
 #'   Selecting assurance = .5 (selecting the noncentrality parameter at the 50th
-#'   percentile of the likelihood distribution) results in a median-unbiased 
-#'   estimate of the population noncentrality parameter and corrects for 
-#'   publication bias only. In order to correct for uncertainty, assurance > .5 
+#'   percentile of the likelihood distribution) results in a median-unbiased
+#'   estimate of the population noncentrality parameter and corrects for
+#'   publication bias only. In order to correct for uncertainty, assurance > .5
 #'   can be selected, which corresponds to selecting the noncentrality parameter
 #'   associated with the (1 - assurance) quantile of the likelihood
 #'   distribution.
-#'   
+#'
 #'   If the previous study of interest has not been subjected to publication
 #'   bias (e.g., a pilot study), \code{alpha.prior} can be set to 1 to indicate
 #'   no publication bias. Alternative \eqn{\alpha}-levels can also be
@@ -56,19 +58,19 @@
 #'   publication bias than the default of .05. In essence, setting
 #'   \code{alpha.prior} at .20 assumes that studies with \eqn{p}-values less
 #'   than .20 are published, whereas those with alrger \eqn{p}-values are not.
-#'   
-#'   In some cases, the corrected noncentrality parameter for a given level of 
-#'   assurance will be estimated to be zero. This is an indication that, at the 
-#'   desired level of assurance, the previous study's effect cannot be 
-#'   accurately estimated due to high levels of uncertainty and bias. When this 
-#'   happens, subsequent sample size planning is not possible with the chosen 
+#'
+#'   In some cases, the corrected noncentrality parameter for a given level of
+#'   assurance will be estimated to be zero. This is an indication that, at the
+#'   desired level of assurance, the previous study's effect cannot be
+#'   accurately estimated due to high levels of uncertainty and bias. When this
+#'   happens, subsequent sample size planning is not possible with the chosen
 #'   specifications. Two alternatives are recommended. First, users can select a
 #'   lower value of assurance (e.g. .8 instead of .95). Second, users can reduce
-#'   the influence of publciation bias by setting \code{alpha.prior} at a value 
+#'   the influence of publciation bias by setting \code{alpha.prior} at a value
 #'   greater than .05. It is possible to correct for uncertainty only by setting
-#'   \code{alpha.prior}=1 and choosing the desired level of assurance. We 
+#'   \code{alpha.prior}=1 and choosing the desired level of assurance. We
 #'   encourage users to make the adjustments as minimal as possible.
-#'   
+#'
 #'   \code{ss.power.wa.general} assumes sphericity for the within-subjects
 #'   effects.
 #'
@@ -93,6 +95,7 @@
 #'   add unnecessary computational time)
 #'
 #' @return Suggested per-group sample size for planned study
+#' Publication bias and uncertainty- adjusted prior study noncentrality parameter
 #'
 #' @export
 #' @import stats
@@ -109,8 +112,8 @@
 #'   Behavioral Research, 52,} 305-322.
 #'
 #'   Anderson, S. F., Kelley, K., & Maxwell, S. E. (2017). Sample size
-#'   planning for more accurate statistical power: A method correcting sample 
-#'   effect sizes for uncertainty and publication bias. \emph{Psychological 
+#'   planning for more accurate statistical power: A method correcting sample
+#'   effect sizes for uncertainty and publication bias. \emph{Psychological
 #'   Science, 28,} 1547-1562.
 #'
 #'   Taylor, D. J., & Muller, K. E. (1996). Bias in linear model power and
@@ -173,5 +176,5 @@ ss.power.wa.general <- function(F.observed, N, df.numerator, alpha.prior=.05, al
     }
   }
   repn <- nrep-1
-  return(repn) # This is the same as total N needed
+  return(list(repn, TM.Percentile)) # This is the same as total N needed
 }

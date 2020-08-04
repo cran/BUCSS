@@ -6,7 +6,7 @@
 \alias{BUCSS-package}
 \title{Bias and Uncertainty Corrected Sample Size (BUCSS)}
 \description{
-BUCSS implements a method of correcting for publication bias anduncertainty when planning sample sizes in a future study from an original study
+Bias- and Uncertainty-Corrected Sample Size. BUCSS implements a method of correcting for publication bias and uncertainty when planning sample sizes in a future study from an original study
 }
 \details{
 Note that \url{https://designingexperiments.com} uses Shiny R apps that implement, via a web interface, the functions contained in BUCSS.
