@@ -1,0 +1,356 @@
+#' Necessary Sample Size to Reach Desired Power for an Independent t Test (or
+#' Standardized Mean Difference) Using a Publication Bias and Uncertainty
+#' Correction Procedure
+#'
+#' @description \code{ss_buc_independent_t} returns the necessary per-group sample size
+#'   to achieve a desired level of statistical power for a planned study using
+#'   an independent \emph{t} test, based on information obtained from a previous
+#'   study. The effect from the previous study can be corrected for publication
+#'   bias and/or uncertainty to provide a sample size that will achieve more
+#'   accurate statistical power for a planned study, when compared to approaches
+#'   that use a sample effect size at face value or rely on sample size only.
+#'   The bias and uncertainty adjusted previous study noncentrality parameter
+#'   is also returned, together with the planning effect size, the effect size
+#'   the plan is built on, as a standardized mean difference.
+#'
+#'   \code{ss_buc_smd} is an alias for \code{ss_buc_independent_t}: the two are the
+#'   same function. The two-group \emph{t} test and the standardized mean
+#'   difference (Cohen's \eqn{d}) describe the same comparison, so the same
+#'   planner serves both framings. Prefer the test-specific name
+#'   (\code{ss_buc_independent_t}) when the prior \emph{t} was computed from raw
+#'   (unstandardized) data, since the planner works directly from the observed
+#'   \emph{t}.
+#'
+#' @details Researchers often use the sample effect size from a prior study as
+#'   an estimate of the likely size of an expected future effect in sample size
+#'   planning. However, sample effect size estimates should not usually be used
+#'   at face value to plan sample size, due to both publication bias and
+#'   uncertainty.
+#'
+#'   The approach implemented in \code{ss_buc_independent_t} uses the observed
+#'   \emph{t} value and sample size from a previous study to correct the
+#'   noncentrality parameter associated with the effect of interest for
+#'   publication bias and/or uncertainty. This new estimated noncentrality
+#'   parameter is then used to calculate the necessary per-group sample size to
+#'   achieve the desired level of power in the planned study.
+#'
+#'   The approach uses a likelihood function of a truncated noncentral
+#'   \emph{F} distribution, where the truncation occurs due to small effect
+#'   sizes being unobserved due to publication bias. The numerator of the
+#'   likelihood function is the density of a noncentral \emph{F} distribution.
+#'   The denominator is the power of the test, which serves to truncate the
+#'   distribution. In the two-group case, this formula reduces to the density of
+#'   a truncated noncentral \emph{t} distribution. (See Taylor & Muller, 1996,
+#'   Equation 2.1; Anderson, Kelley, & Maxwell, 2017, Equation 3; and Anderson
+#'   & Maxwell, 2017, for more details.)
+#'
+#'   Assurance is the proportion of times that power will be at or above the
+#'   desired level, if the experiment were to be reproduced many times. For
+#'   example, \code{assurance = .5} means that power will be above the desired
+#'   level half of the time, but below the desired level the other half of the
+#'   time. Selecting \code{assurance = .5} (selecting the noncentrality
+#'   parameter at the 50th percentile of the likelihood distribution) results in
+#'   a median unbiased estimate of the population noncentrality parameter and
+#'   does not correct for uncertainty. In order to correct for uncertainty,
+#'   \code{assurance > .5} can be selected, which corresponds to selecting the
+#'   noncentrality parameter associated with the (1 - assurance) quantile of the
+#'   likelihood distribution.
+#'
+#'   \code{alpha_prior} is the significance level a prior result had to reach
+#'   to be published: the correction assumes that only results with \emph{p}
+#'   values below \code{alpha_prior} reach the literature, and so reach you.
+#'   Different \eqn{\alpha} levels represent differing amounts of publication
+#'   bias. For example, setting \code{alpha_prior = .20} assumes that studies
+#'   with \emph{p} values less than .20 are published, whereas those with
+#'   larger \emph{p} values are not, which reflects less severe publication
+#'   bias than the default of .05. If the previous study of interest has not
+#'   been subjected to publication bias (e.g., a pilot study), set
+#'   \code{alpha_prior = 1}, which may also be written
+#'   \code{alpha_prior = "No Publication Filter"}; Anderson, Kelley, and
+#'   Maxwell (2017, p. 1552) note that it can be set equal to 1 when
+#'   publication bias is thought not to apply. Because no \emph{p} value
+#'   exceeds 1, this means no publication filter at all: any result would
+#'   have been published whatever its \emph{p} value, so there is no
+#'   publication bias to correct, and only the correction for uncertainty,
+#'   set by \code{assurance}, remains.
+#'
+#'   In some cases, the corrected noncentrality parameter for a given level of
+#'   assurance will be estimated to be zero. This is an indication that, at the
+#'   desired level of assurance, the previous study's effect cannot be
+#'   accurately estimated due to high levels of uncertainty and bias. When this
+#'   happens, subsequent sample size planning is not possible with the chosen
+#'   specifications, and the function stops with an informative error rather
+#'   than returning a result. The error reports the largest assurance the prior
+#'   result can support, which is \eqn{1 - p/\alpha}{1 - p/alpha}, where
+#'   \emph{p} is the prior study's \emph{p} value and \eqn{\alpha} is
+#'   \code{alpha_prior}; at any higher assurance the corrected noncentrality
+#'   parameter is driven to zero. Two remedies are available. First, users can
+#'   select a lower value of assurance (e.g., .8 instead of .95), at or below
+#'   the reported ceiling. Second, users can reduce the influence of publication
+#'   bias by setting \code{alpha_prior} at a value greater than .05, which raises
+#'   the ceiling. Note that \code{alpha_prior} is not a property of the prior
+#'   study, which is fixed, but the analyst's assumption about the publication
+#'   threshold its literature faced. When the ceiling is at or below the
+#'   recommended floor of .5, lowering assurance cannot help and
+#'   \code{alpha_prior} is the only remaining lever. It is possible to correct
+#'   for uncertainty only by setting \code{alpha_prior = 1} and choosing the
+#'   desired level of assurance. We encourage users to make the adjustments as
+#'   minimal as possible.
+#'
+#'   The returned \code{actual_power} is the statistical power of the plan
+#'   this function reports: the power of a study of the returned sample size
+#'   when the effect is the returned bias and uncertainty adjusted
+#'   noncentrality parameter. Because a sample size must be a whole number,
+#'   \code{actual_power} is never below the \code{desired_power} that was
+#'   requested and is usually a little above it.
+#'
+#'   The observed \emph{t} may be entered with either sign. The publication
+#'   rule the correction assumes is two-sided and the truncated likelihood
+#'   is symmetric in the sign of \emph{t}, so only the magnitude enters the
+#'   computation: \code{t_observed = -3} plans exactly the sample size that
+#'   \code{t_observed = 3} plans. The sign of a two-group \emph{t} records
+#'   which group was subtracted from which, an arbitrary coding choice
+#'   rather than evidence. When planning a replication, confirm that the
+#'   magnitude belongs to an effect in the direction the planned study is
+#'   designed to detect (Anderson & Kelley, 2024): the correction adjusts
+#'   the size of the prior effect, not its direction.
+#'
+#'   If you are working from a standardized mean difference (Cohen's \eqn{d})
+#'   rather than a \emph{t} statistic, convert it before calling: for two
+#'   independent groups
+#'   \eqn{t = d / \sqrt{1/n_1 + 1/n_2}}{t = d / sqrt(1/n_1 + 1/n_2)}, which
+#'   equals \eqn{d\sqrt{n/2}}{d*sqrt(n/2)} when the per-group sample sizes are
+#'   equal.
+#'
+#'   \code{ss_buc_independent_t} assumes that the planned study will have equal
+#'   \emph{n}. Unequal \emph{n} in the previous study is handled in the
+#'   following way for the independent \emph{t}. If the user enters an odd
+#'   value for \emph{N}, no information is available on the exact group sizes.
+#'   The function calculates \emph{n} by dividing \emph{N} by 2 and both
+#'   rounding up and rounding down the result, thus assuming equal \emph{n}.
+#'   The suggested sample size for the planned study is calculated using both
+#'   of these values of \emph{n}, and the function returns the larger of these
+#'   two suggestions, to be conservative. If the user enters a vector for
+#'   \emph{n} with two different values, specific information is available on
+#'   the exact group sizes. \emph{n} is calculated as the harmonic mean of
+#'   these two values (a measure of effective sample size). Again, this is
+#'   rounded both up and down. The suggested sample size for the planned study
+#'   is calculated using both of these values of \emph{n}, and the function
+#'   returns the larger of these two suggestions, to be conservative. The
+#'   adjusted noncentrality parameter that is output is the lower of the two
+#'   possibilities, again, to be conservative. The planning effect size belongs
+#'   to the same balanced design as the reported noncentrality parameter, so an
+#'   ordinary power analysis at it can return a sample size a little smaller
+#'   than the one reported here (never a larger one), because the reported size
+#'   is the larger of the two rounded designs' requirements. For a prior study
+#'   with unequal group sizes, or a total sample size that does not divide
+#'   evenly, the largest supportable assurance is computed at the balanced
+#'   design the planner plans from, so it can be below
+#'   \eqn{1 - p/\alpha}{1 - p/alpha} at the study's own \emph{p} value. When
+#'   the individual group sizes of an unequal-\emph{n} previous study are
+#'   known, we highly encourage entering these explicitly, especially if the
+#'   sample sizes are quite discrepant, as this allows for the greatest
+#'   precision in estimating an appropriate planned study \emph{n}.
+#'
+#' @param t_observed Observed \emph{t} value from a previous study used to plan
+#'   sample size for a planned study. Either sign is accepted: the
+#'   publication rule is two-sided, so only the magnitude enters the
+#'   correction (see Details).
+#' @param n Per group sample size (if equal) or the two group sample sizes of
+#'   the previous study (enter either a single number or a vector of length 2).
+#' @param N Total sample size of the previous study, assumed equal across groups
+#'   if specified.
+#' @template planning-params
+#'
+#' @templateVar size_phrase per-group sample size
+#' @templateVar ncp_scale on the scale of the \emph{t} statistic (the noncentrality parameter of the prior study's noncentral \emph{t})
+#' @templateVar effect_phrase \code{smd_planning}, a standardized mean difference (Cohen's \eqn{\delta}{delta}, a magnitude), \eqn{\lambda\sqrt{2/n}}{lambda * sqrt(2/n)}, where \eqn{\lambda}{lambda} is \code{ncp_adjusted} and \emph{n} the per-group size of the balanced prior design it belongs to (see Details)
+#' @template return
+#'
+#' @export
+#'
+#' @examples
+#' result <- ss_buc_independent_t(t_observed = 3, n = 20, alpha_prior = .05,
+#'   alpha_planned = .05, assurance = .80, desired_power = .80)
+#' result
+#' result$value[result$term == "necessary_n_per_group"]
+#'
+#' # ss_buc_smd is the same function under an effect size name
+#' ss_buc_smd(t_observed = 3, n = 20)
+#'
+#' # A prior study that faced no publication filter (a pilot study, say):
+#' # alpha_prior = "No Publication Filter" means the same as alpha_prior = 1
+#' ss_buc_independent_t(t_observed = 3, n = 20,
+#'   alpha_prior = "No Publication Filter")
+#'
+#' # Asking for more assurance than the prior result can support stops with an
+#' # informative error that reports the largest workable assurance (here near
+#' # .90, the value 1 - p/alpha_prior for this prior result):
+#' try(ss_buc_independent_t(t_observed = 3, n = 20, assurance = .95))
+#'
+#' @author Ken Kelley (\email{kkelley@@nd.edu}) and
+#'   Samantha F. Anderson (\email{samantha.f.anderson@@asu.edu})
+#'
+#' @template references
+ss_buc_independent_t <- function(t_observed, n, N, alpha_prior = .05, alpha_planned = .05,
+                           assurance = .80, desired_power = .80) {
+  v <- .validate_planning_inputs(alpha_prior, alpha_planned, assurance, desired_power)
+  alpha_prior <- v$alpha_prior
+  alpha_prior_input <- v$alpha_prior_input
+  assurance <- v$assurance
+  desired_power <- v$desired_power
+
+  .check_scalar_finite(t_observed, "t_observed")
+
+  # Treat N = NULL, and n = NULL, as absent, so every no-size path gets the
+  # friendly error rather than a cryptic missing-argument or undefined-object
+  # failure, and so 'n = NULL' with 'N' plans exactly as 'N' alone does (as
+  # 'N = NULL' with 'n' always has).
+  no_n <- missing(n) || is.null(n)
+  if ((missing(N) || is.null(N)) && no_n) {
+    stop("You must specify the prior study's sample size: either 'n' (the per group size, or the two group sizes as a length-2 vector) or 'N' (the total).", call. = FALSE)
+  }
+
+  # The publication rule is two-sided and TM is symmetric in the sign of t,
+  # so only the magnitude enters the correction; the sign records which group
+  # was subtracted from which, a coding choice, not evidence. The user's
+  # signed value is echoed unchanged in the stored inputs.
+  t_stat <- abs(t_observed)
+
+  if (!missing(N)) {
+    if (!is.null(N)) {
+      # The round-down branch has df = 2 * floor(N / 2) - 2, so N = 3 would
+      # already drive the error df to 0; the smallest workable total is 4.
+      .check_count(N, "N", min = 4)
+      if (!no_n) stop("Because you specified 'N' you should not specify 'n'.", call. = FALSE)
+      n_ru <- ceiling(N / 2)
+      N_ru <- 2 * n_ru
+      DF_ru <- N_ru - 2
+
+      n_rd <- floor(N / 2)
+      N_rd <- 2 * n_rd
+      DF_rd <- N_rd - 2
+    }
+  }
+
+  if (missing(N) || is.null(N)) {
+    if (!(length(n) %in% c(1, 2))) stop("The value of 'n' should be a vector of length two or a single value (for equal group sample sizes).", call. = FALSE)
+    # A single size is checked as any count is. Two sizes get a message of
+    # their own: the count check's "must be a single whole number" is wrong
+    # for an argument that may hold two.
+    if (length(n) == 1L) {
+      for (n_i in n) .check_count(n_i, "n", min = 2)
+    } else {
+      for (n_i in n) {
+        if (!is.numeric(n_i) || length(n_i) != 1L || !is.finite(n_i) ||
+            n_i != floor(n_i) || n_i < 2)
+          stop("Each of the two group sizes in 'n' must be a whole number of at least 2.", call. = FALSE)
+      }
+    }
+    n <- as.numeric(n)  # integer sizes overflow R's integer range in n_1 + n_2
+    if (length(n) == 2) {
+      n_1 <- n[1]
+      n_2 <- n[2]
+      # The harmonic mean 2 * n_1 * n_2 / (n_1 + n_2), rounded down and up in
+      # integer arithmetic. Through a floating-point quotient an exact whole
+      # number can land a unit in the last place away from itself (49 and 49
+      # gives 49.000000000000007), which ceiling() or floor() then turns into
+      # a spurious second rounding branch one unit off.
+      hm_num <- 2 * n_1 * n_2
+      hm_den <- n_1 + n_2
+      n_rd <- hm_num %/% hm_den
+      n_ru <- n_rd + (hm_num %% hm_den != 0)
+      N_ru <- 2 * n_ru
+      DF_ru <- N_ru - 2
+      N_rd <- 2 * n_rd
+      DF_rd <- N_rd - 2
+    }
+    if (length(n) == 1) {
+      n_ru <- n
+      N_ru <- 2 * n_ru
+      DF_ru <- N_ru - 2
+      n_rd <- n
+      N_rd <- 2 * n_rd
+      DF_rd <- N_rd - 2
+    }
+  }
+
+  # The prior study's own p value, at its own degrees of freedom, so that a
+  # statistic significant there but not at the rounded-down design is not
+  # called nonsignificant (see .stop_nonsignificant()).
+  df_own <- if (!missing(N) && !is.null(N)) N - 2 else if (length(n) == 2) sum(n) - 2 else 2 * n - 2
+  p_own <- 2 * pt(t_stat, df = df_own, lower.tail = FALSE)
+
+  ## Rounding up
+  value_critical_ru <- qt(1 - alpha_prior / 2, df = DF_ru)
+  if (t_stat <= value_critical_ru)
+    .stop_nonsignificant("t statistic", "'t_observed'", p_own, alpha_prior,
+                         2 * pt(t_stat, df = DF_rd, lower.tail = FALSE), assurance)
+  solution_ru <- .solve_ncp_assurance(
+    .tm_t(t_stat, value_critical_ru, DF_ru), assurance)
+  ncp_ru <- solution_ru$ncp
+
+  ## Rounding down
+  value_critical_rd <- qt(1 - alpha_prior / 2, df = DF_rd)
+  if (t_stat <= value_critical_rd)
+    .stop_nonsignificant("t statistic", "'t_observed'", p_own, alpha_prior,
+                         2 * pt(t_stat, df = DF_rd, lower.tail = FALSE), assurance)
+  solution_rd <- .solve_ncp_assurance(
+    .tm_t(t_stat, value_critical_rd, DF_rd), assurance)
+  ncp_rd <- solution_rd$ncp
+
+  # Both branches are solved before either can refuse, so the refusal names
+  # the smaller of the two ceilings, which is a feasible assurance for both.
+  if (ncp_ru == 0 || ncp_rd == 0)
+    .stop_zero_ncp(min(solution_ru$ceiling, solution_rd$ceiling))
+
+  power_at <- function(n_rep, n_prior, ncp_b) {
+    denom_df <- (2 * n_rep) - 2
+    critical_t <- qt(1 - alpha_planned / 2, df = denom_df)
+    scaled <- sqrt(n_rep / n_prior) * ncp_b
+    (1 - pt(critical_t, df = denom_df, ncp = scaled)) +
+      pt(-1 * critical_t, df = denom_df, ncp = scaled)
+  }
+  repn_ru <- .smallest_n_for_power(function(k) power_at(k, n_ru, ncp_ru), desired_power)
+  repn_rd <- .smallest_n_for_power(function(k) power_at(k, n_rd, ncp_rd), desired_power)
+
+  output_n <- max(repn_ru, repn_rd)
+  df_error <- 2 * output_n - 2
+  # The reported noncentrality parameter is the smaller of the two branches',
+  # and n_b the prior per-group size it belongs to. The power of the pair this
+  # function reports: the returned sample size evaluated at the returned
+  # (adjusted) noncentrality parameter, using the prior n that parameter came
+  # from. It is at least 'desired_power', because the returned size is the
+  # larger of the two roundings' requirements, and usually a little higher,
+  # because the size is a whole number. The planning effect size restates the
+  # same parameter as a standardized mean difference at n_b, so the ordinary
+  # power of the returned size at that effect is exactly actual_power.
+  use_rd <- ncp_rd <= ncp_ru
+  n_b <- if (use_rd) n_rd else n_ru
+  ncp_b <- if (use_rd) ncp_rd else ncp_ru
+  actual_power <- power_at(output_n, n_b, ncp_b)
+  .bucss_plan_result(
+    sample_size = output_n,
+    size_term = "necessary_n_per_group",
+    effect_size_term = "smd_planning",
+    effect_size = .es_smd(ncp_b, n_b),
+    actual_power = actual_power,
+    df_effect = 1,
+    df_error = df_error,
+    ncp = ncp_b,
+    design = "Independent t test",
+    sample_size_unit = "per group",
+    assurance_ceiling = min(solution_ru$ceiling, solution_rd$ceiling),
+    total_n = 2 * output_n,
+    inputs = list(t_observed = t_observed,
+                  n = if (no_n) NULL else n,
+                  N = if (missing(N) || is.null(N)) NULL else N,
+                  alpha_prior = alpha_prior_input,
+                  alpha_planned = alpha_planned, assurance = assurance,
+                  desired_power = desired_power)
+  )
+}
+
+#' @rdname ss_buc_independent_t
+#' @export
+ss_buc_smd <- ss_buc_independent_t

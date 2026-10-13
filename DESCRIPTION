@@ -1,17 +1,52 @@
 Package: BUCSS
 Type: Package
 Title: Bias and Uncertainty Corrected Sample Size
-Version: 1.2.1
-Author: Samantha F. Anderson <samantha.f.anderson@asu.edu>, Ken Kelley <kkelley@nd.edu>
-Maintainer: Ken Kelley <kkelley@nd.edu>
-Description: Bias- and Uncertainty-Corrected Sample Size. BUCSS implements a method of correcting for publication bias and
-    uncertainty when planning sample sizes in a future study from an original study. See Anderson, Kelley, & Maxwell (2017; Psychological Science, 28, 1547-1562). 
+Version: 2.0.0
+Date: 2026-10-13
+Authors@R: c(
+    person("Ken", "Kelley", role = c("aut", "cre"),
+           email = "kkelley@nd.edu",
+           comment = c(ORCID = "0000-0002-4756-8360")),
+    person("Samantha F.", "Anderson", role = "aut",
+           email = "samantha.f.anderson@asu.edu",
+           comment = c(ORCID = "0000-0003-4451-5295")),
+    person("Scott E.", "Maxwell", role = "aut",
+           comment = c(ORCID = "0000-0001-8067-7027")))
+Description: Implements sample size planning for a future study from the summary
+    statistics of a prior study, correcting the prior effect for publication bias
+    and uncertainty so the planned study attains its target statistical power more
+    reliably than methods that take a sample effect size at face value. Planners
+    cover the one-sample, paired, independent, and Welch t tests; between-subjects
+    analysis of variance and covariance; within-subjects and split-plot analysis
+    of variance; a regression coefficient, the squared multiple correlation, and a
+    subset of predictors; the Pearson correlation; a two-group multivariate
+    comparison; and the chi square difference between nested models. The
+    regression planners can treat the predictors as fixed or as sampled, the
+    within-subjects and split-plot planners accept a sphericity correction, and
+    each plan reports the effect size it is built on. A simulation function
+    audits how often a plan attains its target power. The method is described in
+    Anderson, Kelley, and Maxwell (2017) <doi:10.1177/0956797617723724>
+    and extended to replication studies in Anderson and Kelley (2024)
+    <doi:10.1037/met0000520>.
 License: GPL (>= 3)
 Encoding: UTF-8
-Imports: stats
-LazyData: TRUE
-RoxygenNote: 7.1.1
+Language: en-US
+Depends: R (>= 3.6.0)
+Imports: generics, graphics, stats, withr (>= 3.0.3)
+Suggests: testthat (>= 3.1.7), knitr, rmarkdown
+VignetteBuilder: knitr
+URL: https://github.com/yelleKneK/BUCSS,
+        https://yelleKneK.github.io/BUCSS/,
+        https://designingexperiments.com
+BugReports: https://github.com/yelleKneK/BUCSS/issues
+Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
 NeedsCompilation: no
-Packaged: 2020-08-21 20:16:17 UTC; kkelley
+Packaged: 2026-10-13 14:22:57 UTC; kkelley
+Author: Ken Kelley [aut, cre] (ORCID: <https://orcid.org/0000-0002-4756-8360>),
+  Samantha F. Anderson [aut] (ORCID:
+    <https://orcid.org/0000-0003-4451-5295>),
+  Scott E. Maxwell [aut] (ORCID: <https://orcid.org/0000-0001-8067-7027>)
+Maintainer: Ken Kelley <kkelley@nd.edu>
 Repository: CRAN
-Date/Publication: 2020-08-25 16:50:03 UTC
+Date/Publication: 2026-10-13 23:00:30 UTC

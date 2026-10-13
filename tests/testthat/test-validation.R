@@ -1,0 +1,569 @@
+# Validation tests: every guard that should stop() or warning() before any
+# sample size planning happens. Messages are matched as fixed substrings.
+
+# The range errors are matched on their opening words, "There is a problem
+# with '<argument>'", not on the argument's name alone: a refusal raised
+# further on (the nonsignificance or zero noncentrality parameter message)
+# also names 'alpha_prior' and 'assurance', so the bare name passed even when
+# the validator let an endpoint through (TQ-6 of the 2026-10-12 triage: with
+# 'alpha_prior <= 0' weakened to '< 0', or 'assurance >= 1' to '> 1', every
+# test still passed).
+test_that("out-of-range alpha_prior is rejected", {
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, alpha_prior = 1.5),
+               "There is a problem with 'alpha_prior'", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, alpha_prior = 0),
+               "There is a problem with 'alpha_prior'", fixed = TRUE)
+})
+
+test_that("out-of-range alpha_planned is rejected", {
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, alpha_planned = 1),
+               "There is a problem with 'alpha_planned'", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, alpha_planned = 0),
+               "There is a problem with 'alpha_planned'", fixed = TRUE)
+})
+
+test_that("out-of-range assurance is rejected", {
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, assurance = -.1),
+               "There is a problem with 'assurance'", fixed = TRUE)
+})
+
+test_that("endpoint assurance and power are rejected, not silently planned", {
+  # assurance = 0 has no root (TM is strictly positive): the old behavior
+  # returned the uniroot bracket endpoint as the adjusted NCP.
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 50, assurance = 0),
+               "There is a problem with 'assurance'", fixed = TRUE)
+  # desired_power = 100 coerces to a target of exactly 1.0, which the search can only
+  # "reach" by floating-point error in pt(); desired_power = 0 trivially returned n = 2.
+  expect_error(ss_buc_paired_t(t_observed = 3, N = 25, desired_power = 100),
+               "There is a problem with 'desired_power'", fixed = TRUE)
+  expect_error(ss_buc_paired_t(t_observed = 3, N = 25, desired_power = 0),
+               "There is a problem with 'desired_power'", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, assurance = 100),
+               "There is a problem with 'assurance'", fixed = TRUE)
+  # The documented percentage rule is untouched: exactly 1 still means 1
+  # percent (coercion runs before the range check), so desired_power = 1 is
+  # read as a target of .01, not stopped as out of range, and assurance = 1
+  # reaches the < .5 warning rather than the range stop. Until 2026-10-13 this
+  # line asserted that 'desired_power = 1' planned without error (it returned
+  # the smallest size the search considers). A target of .01 is below
+  # 'alpha_planned', which is not allowable, so the call is now refused, with
+  # a message that explains the percentage reading; the coercion itself shows
+  # where 'alpha_planned' is smaller still, and the plan echoes .01.
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, desired_power = 1),
+               paste0("The 'desired_power' you entered, 1, is 1 or more, so it was read as a ",
+                      "percentage (1 percent, that is, .01)."), fixed = TRUE)
+  one_percent <- ss_buc_independent_t(t_observed = 3, n = 20, desired_power = 1,
+                                      alpha_planned = .001)
+  expect_identical(one_percent$value[one_percent$term == "desired_power"], .01)
+  expect_warning(ss_buc_independent_t(t_observed = 3, n = 20, assurance = 1),
+                 "< .5", fixed = TRUE)
+})
+
+test_that("a desired_power at or below alpha_planned is not allowable", {
+  # Ken Kelley's decision, 2026-10-13 (the triage's GF-4 and PC-7). A test's
+  # power is never below its Type I error rate, so every sample size "meets"
+  # such a target: the planners used to return the smallest size the search
+  # considers, with no notice. They now refuse, in the shared validator, after
+  # the percentage coercion, and no plan is returned. One call per planner.
+  planners <- list(
+    quote(ss_buc_independent_t(t_observed = 3, n = 20)),
+    quote(ss_buc_paired_t(t_observed = 3, N = 30)),
+    quote(ss_buc_one_sample_t(t_observed = 3, N = 30)),
+    quote(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_ratio = 2)),
+    quote(ss_buc_one_way_anova(F_observed = 5, N = 60, levels_A = 3)),
+    quote(ss_buc_factorial_anova(F_observed = 12, N = 60, levels_A = 3, levels_B = 2)),
+    quote(ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                         df_numerator = 2, df_denominator = 114)),
+    quote(ss_buc_ancova(F_observed = 6, N = 120, cells = 3, n_covariates = 2)),
+    quote(ss_buc_rm_anova(F_observed = 5, N = 30, levels_A = 4)),
+    quote(ss_buc_rm_anova_general(F_observed = 9, N = 80, df_numerator = 1)),
+    quote(ss_buc_mixed_anova(F_observed = 5, N = 60, levels_between = 2,
+                             levels_within = 3, effect = "within")),
+    quote(ss_buc_mixed_anova_general(F_observed = 9, N = 60, df_numerator = 1,
+                                     num_groups = 2, effect = "between_only")),
+    quote(ss_buc_reg_coef(t_observed = 3, N = 150, p = 3)),
+    quote(ss_buc_R2(F_observed = 5, N = 150, p = 4, random_predictors = TRUE)),
+    quote(ss_buc_reg_joint(F_observed = 6, N = 150, p = 4, p_joint = 2)),
+    quote(ss_buc_correlation(r_observed = .35, N = 100)),
+    quote(ss_buc_manova(F_observed = 5, N = 80, p_variables = 3)),
+    quote(ss_buc_chisq_diff(chisq_observed = 9, N = 250, df_full = 42, df_restricted = 43)))
+  expect_setequal(vapply(planners, function(call) as.character(call[[1]]), character(1)),
+                  vapply(BUCSS:::.BUCSS_DESIGN_SPECS, `[[`, character(1), "planner"))
+  with_args <- function(call, ...) {
+    extra <- list(...)
+    for (nm in names(extra)) call[[nm]] <- extra[[nm]]
+    call
+  }
+  reason <- paste0("A test's power is never below its Type I error rate, so every sample ",
+                   "size would meet such a target and no plan is meaningful. Please specify ",
+                   "a 'desired_power' above 'alpha_planned' (the default is .80).")
+  plain <- paste0("A 'desired_power' at or below 'alpha_planned' is not allowable: ",
+                  "'desired_power' is .03 and 'alpha_planned' is .05. ", reason)
+  percent <- paste0("A 'desired_power' at or below 'alpha_planned' is not allowable: ",
+                    "'desired_power' is .04 and 'alpha_planned' is .05. The 'desired_power' ",
+                    "you entered, 4, is 1 or more, so it was read as a percentage (4 ",
+                    "percent, that is, .04). ", reason)
+  for (call in planners) {
+    label <- paste(deparse(call, width.cutoff = 500L), collapse = " ")
+    # Below alpha_planned: the whole message, raised with call. = FALSE.
+    err <- tryCatch(eval(with_args(call, desired_power = .03)), error = function(e) e)
+    expect_s3_class(err, "error")
+    expect_identical(conditionMessage(err), plain, label = label)
+    expect_null(conditionCall(err), label = label)
+    # Equal to alpha_planned is refused too ("at or below").
+    expect_error(eval(with_args(call, desired_power = .05)),
+                 "'desired_power' is .05 and 'alpha_planned' is .05.", fixed = TRUE,
+                 label = label)
+    # A value of 1 or more is read as a percentage first, and the message says so.
+    err <- tryCatch(eval(with_args(call, desired_power = 4)), error = function(e) e)
+    expect_identical(conditionMessage(err), percent, label = label)
+    expect_error(eval(with_args(call, desired_power = 1)),
+                 "it was read as a percentage (1 percent, that is, .01).", fixed = TRUE,
+                 label = label)
+    # The comparison is with this call's 'alpha_planned', after the coercion:
+    # 8 percent is below a planned alpha of .10 and above one of .05.
+    expect_error(eval(with_args(call, desired_power = 8, alpha_planned = .10)),
+                 "'desired_power' is .08 and 'alpha_planned' is .10.", fixed = TRUE,
+                 label = label)
+    just_above <- eval(with_args(call, desired_power = 8))
+    expect_s3_class(just_above, "bucss_plan")
+    expect_identical(just_above$value[just_above$term == "desired_power"], .08)
+    expect_gte(just_above$value[just_above$term == "actual_power"], .08)
+  }
+
+  # Not allowable means no plan: it is an error, not a warning with a plan.
+  refused <- tryCatch(withCallingHandlers(
+    ss_buc_paired_t(t_observed = 3, N = 30, desired_power = .05),
+    warning = function(w) stop("a warning was raised: ", conditionMessage(w))),
+    error = function(e) e)
+  expect_match(conditionMessage(refused), "is not allowable", fixed = TRUE)
+  # The other checks of 'desired_power' come first and are unchanged: out of
+  # range values keep their own message, and 100 still means 1.
+  for (bad in list(0, -.1, 100, 150))
+    expect_error(ss_buc_paired_t(t_observed = 3, N = 30, desired_power = bad),
+                 "There is a problem with 'desired_power'", fixed = TRUE)
+  # Small values print as decimals, never in scientific notation.
+  expect_error(ss_buc_paired_t(t_observed = 3, N = 30, desired_power = .00002,
+                               alpha_planned = .0001),
+               "'desired_power' is .00002 and 'alpha_planned' is .0001.", fixed = TRUE)
+  expect_error(ss_buc_paired_t(t_observed = 3, N = 30, desired_power = 2.5),
+               paste0("The 'desired_power' you entered, 2.5, is 1 or more, so it was read as a ",
+                      "percentage (2.5 percent, that is, .025)."), fixed = TRUE)
+})
+
+test_that("the replays refuse a plan whose target power is not allowable", {
+  # No planner returns such a plan, so one can only be made by editing a
+  # plan's rows. ss_buc_sensitivity() and plot() replay the planner from the
+  # echoed rows before doing anything else, and the replay is refused with
+  # the validator's own message rather than audited or drawn.
+  plan <- ss_buc_paired_t(t_observed = 3, N = 30)
+  forged <- unclass(plan)
+  forged$value[forged$term == "desired_power"] <- .03
+  class(forged) <- class(plan)
+  expect_true(BUCSS:::.is_plan_shape(forged))
+  not_allowable <- "A 'desired_power' at or below 'alpha_planned' is not allowable:"
+  expect_error(ss_buc_sensitivity(forged, true_ncp = 2, replications = 10, seed = 2017),
+               not_allowable, fixed = TRUE)
+  pdf(NULL)
+  drawn <- tryCatch(plot(forged), error = function(e) e)
+  dev.off()
+  expect_s3_class(drawn, "error")
+  expect_match(conditionMessage(drawn), not_allowable, fixed = TRUE)
+})
+
+test_that("assurance below .5 warns but still computes", {
+  expect_warning(ss_buc_independent_t(t_observed = 3, n = 20, assurance = .4),
+                 "< .5", fixed = TRUE)
+})
+
+test_that("out-of-range power is rejected", {
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, desired_power = -.1),
+               "There is a problem with 'desired_power'", fixed = TRUE)
+})
+
+test_that("a nonsignificant prior t is rejected", {
+  expect_error(ss_buc_independent_t(t_observed = 1, n = 20),
+               "nonsignificant", fixed = TRUE)
+})
+
+test_that("a negative prior t plans from its magnitude (two-sided rule)", {
+  # The publication rule is two-sided and TM is symmetric in the sign of
+  # t, so t = -3 is the same evidence as t = 3; the sign is the analyst's
+  # coding of the comparison, and the planned sample size must not depend
+  # on it. The signed value is still echoed in the stored inputs.
+  neg <- ss_buc_independent_t(t_observed = -3, n = 20)
+  pos <- ss_buc_independent_t(t_observed = 3, n = 20)
+  expect_equal(neg$value[neg$term != "t_observed"],
+               pos$value[pos$term != "t_observed"])
+  expect_identical(neg$value[neg$term == "t_observed"][1], -3)
+
+  neg_p <- ss_buc_paired_t(t_observed = -3, N = 40)
+  pos_p <- ss_buc_paired_t(t_observed = 3, N = 40)
+  expect_equal(neg_p$value[neg_p$term != "t_observed"],
+               pos_p$value[pos_p$term != "t_observed"])
+  expect_identical(neg_p$value[neg_p$term == "t_observed"][1], -3)
+
+  neg_r <- ss_buc_reg_coef(t_observed = -3, N = 150, p = 3)
+  pos_r <- ss_buc_reg_coef(t_observed = 3, N = 150, p = 3)
+  expect_equal(neg_r$value[neg_r$term != "t_observed"],
+               pos_r$value[pos_r$term != "t_observed"])
+  expect_identical(neg_r$value[neg_r$term == "t_observed"][1], -3)
+
+  # A magnitude below the two-tailed cutoff is still rejected, whatever
+  # its sign, and the alpha_prior remedy in the message is now reachable.
+  expect_error(ss_buc_independent_t(t_observed = -1, n = 20),
+               "nonsignificant", fixed = TRUE)
+  expect_error(ss_buc_paired_t(t_observed = -1, N = 40),
+               "nonsignificant", fixed = TRUE)
+  expect_error(ss_buc_reg_coef(t_observed = -1, N = 150, p = 3),
+               "nonsignificant", fixed = TRUE)
+})
+
+test_that("a nonsignificant prior F is rejected", {
+  expect_error(
+    ss_buc_factorial_anova(F_observed = 1, N = 120, levels_A = 2, levels_B = 3,
+                           effect = "factor_B"),
+    "nonsignificant", fixed = TRUE)
+})
+
+test_that("between-subjects ANOVA requires N", {
+  expect_error(
+    ss_buc_factorial_anova(F_observed = 5, levels_A = 2, levels_B = 3,
+                           effect = "factor_B"),
+    "must specify 'N'", fixed = TRUE)
+})
+
+test_that("the two-way function requires a second factor and points to the one-way function", {
+  expect_error(
+    ss_buc_factorial_anova(F_observed = 5, N = 120, levels_A = 2,
+                           effect = "interaction"),
+    "levels_B", fixed = TRUE)
+  expect_error(
+    ss_buc_factorial_anova(F_observed = 5, N = 120, levels_A = 2,
+                           effect = "interaction"),
+    "ss_buc_one_way_anova", fixed = TRUE)
+})
+
+test_that("the general between-subjects function requires df_denominator", {
+  expect_error(
+    ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                   df_numerator = 2),
+    "must specify 'df_denominator'", fixed = TRUE)
+})
+
+test_that("df_denominator cannot exceed N - cells", {
+  # The 1.2.1 documented example used df_denominator = 117 with N = 120 and
+  # cells = 6, which is impossible (the maximum residual df is 120 - 6 = 114).
+  # Now that df_denominator functions, that value is correctly rejected.
+  expect_error(
+    ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                   df_numerator = 2, df_denominator = 117),
+    "cannot exceed", fixed = TRUE)
+})
+
+test_that("df_denominator must be a positive whole number", {
+  # The count check runs before any comparison, so NA and vector inputs get
+  # the friendly message rather than a base-R condition failure.
+  expect_error(
+    ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                   df_numerator = 2, df_denominator = 0),
+    "must be at least 1", fixed = TRUE)
+  expect_error(
+    ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                   df_numerator = 2, df_denominator = NA),
+    "must be a single whole number", fixed = TRUE)
+  expect_error(
+    ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                   df_numerator = 2, df_denominator = c(114, 114)),
+    "must be a single whole number", fixed = TRUE)
+})
+
+test_that("a corrected noncentrality parameter of zero is rejected", {
+  # t = 2.03 with n = 20 (df = 38) just clears the alpha = .05 critical value
+  # (2.0244), so the prior effect is significant but so weak that at assurance
+  # .95 the bias/uncertainty correction drives the ncp to zero.
+  expect_error(ss_buc_independent_t(t_observed = 2.03, n = 20, assurance = .95),
+               "noncentrality parameter is zero", fixed = TRUE)
+})
+
+test_that("the zero-ncp error reports the closed-form assurance ceiling (independent t)", {
+  # The largest assurance a prior result can support is 1 - p/alpha_prior, where
+  # p is the prior study's two-sided p value. For t = 3 with n = 20 (df = 38)
+  # and the default alpha_prior = .05 that ceiling is about .90, so the
+  # requested assurance of .95 is out of reach and the corrected ncp is zero.
+  p_prior <- 2 * (1 - pt(3, df = 38))
+  ceiling_assurance <- floor((1 - p_prior / .05) * 100 - 1e-9) / 100
+  fragment <- paste0("usable plan is about ",
+                     sub("^0", "", sprintf("%.2f", ceiling_assurance)))
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, assurance = .95),
+               fragment, fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, assurance = .95),
+               "noncentrality parameter is zero", fixed = TRUE)
+})
+
+test_that("the zero-ncp error reports the closed-form assurance ceiling (joint F test)", {
+  # The same closed form holds for an F test, where p is the upper-tail F p
+  # value. F = 5 on 2 and 145 degrees of freedom gives a ceiling near .84, below
+  # the requested assurance of .95, confirming the ceiling on the single-branch
+  # F path as well as the two-branch t path above.
+  p_prior <- 1 - pf(5, df1 = 2, df2 = 145)
+  ceiling_assurance <- floor((1 - p_prior / .05) * 100 - 1e-9) / 100
+  fragment <- paste0("usable plan is about ",
+                     sub("^0", "", sprintf("%.2f", ceiling_assurance)))
+  expect_error(
+    ss_buc_reg_joint(F_observed = 5, N = 150, p = 4, p_joint = 2, assurance = .95),
+    fragment, fixed = TRUE)
+})
+
+test_that("within-subjects ANOVA rejects a non-default effect when 'levels_B' is absent", {
+  # Previously this silently computed the single-factor result; now it stops.
+  expect_error(ss_buc_rm_anova(F_observed = 5, N = 60, levels_A = 3, effect = "factor_B"),
+               "levels_B", fixed = TRUE)
+  expect_error(ss_buc_rm_anova(F_observed = 5, N = 60, levels_A = 3, effect = "interaction"),
+               "levels_B", fixed = TRUE)
+})
+
+test_that("the general split-plot function requires 'df_num_within' for a between-within effect", {
+  expect_error(
+    ss_buc_mixed_anova_general(F_observed = 5, N = 90, df_numerator = 2,
+                               num_groups = 3, effect = "between_within"),
+    "df_num_within", fixed = TRUE)
+})
+
+test_that("the general planners require their structural arguments", {
+  expect_error(ss_buc_factorial_anova_general(F_observed = 5, N = 120,
+                                              df_numerator = 2, df_denominator = 114),
+               "must specify 'cells'", fixed = TRUE)
+  expect_error(ss_buc_factorial_anova_general(F_observed = 5, N = 120, cells = 6,
+                                              df_denominator = 114),
+               "must specify 'df_numerator'", fixed = TRUE)
+  expect_error(ss_buc_rm_anova_general(F_observed = 6.5, N = 80),
+               "must specify 'df_numerator'", fixed = TRUE)
+  expect_error(ss_buc_mixed_anova_general(F_observed = 5, N = 90, num_groups = 3),
+               "must specify 'df_numerator'", fixed = TRUE)
+  expect_error(ss_buc_mixed_anova_general(F_observed = 5, N = 90, df_numerator = 2),
+               "must specify 'num_groups'", fixed = TRUE)
+})
+
+test_that("the regression planners require 'p' (and 'p_joint')", {
+  expect_error(ss_buc_reg_coef(t_observed = 3, N = 150), "specify 'p'", fixed = TRUE)
+  expect_error(ss_buc_R2(F_observed = 5, N = 150), "specify 'p'", fixed = TRUE)
+  expect_error(ss_buc_reg_joint(F_observed = 5, N = 150, p = 4),
+               "specify 'p_joint'", fixed = TRUE)
+})
+
+test_that("'random_predictors' must be TRUE or FALSE", {
+  # A number is refused on purpose: the echoed row is 1 or 0, and only the
+  # registry converts it back, so a value read from a CSV cannot slip in
+  # unconverted.
+  msg <- "'random_predictors' must be TRUE or FALSE."
+  for (bad in list(NA, 1, 0, "yes", c(TRUE, FALSE), NULL, logical(0))) {
+    expect_error(ss_buc_reg_coef(t_observed = 3, N = 150, p = 3,
+                                 random_predictors = bad), msg, fixed = TRUE)
+    expect_error(ss_buc_R2(F_observed = 5, N = 150, p = 4,
+                           random_predictors = bad), msg, fixed = TRUE)
+    expect_error(ss_buc_reg_joint(F_observed = 5, N = 150, p = 4, p_joint = 2,
+                                  random_predictors = bad), msg, fixed = TRUE)
+  }
+})
+
+test_that("non-scalar, non-finite, and non-whole inputs get friendly errors", {
+  # A fractional predictor count used to flow through the planned-n search and
+  # return a non-integer "necessary sample size" (624.5).
+  expect_error(ss_buc_reg_coef(t_observed = 3, N = 150, p = 2.5),
+               "whole number", fixed = TRUE)
+  expect_error(ss_buc_one_way_anova(F_observed = 5, N = 120.5, levels_A = 3),
+               "whole number", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20.5),
+               "whole number", fixed = TRUE)
+  # NA, Inf, and vector inputs used to die inside base R ("missing value where
+  # TRUE/FALSE needed", "the condition has length > 1").
+  expect_error(ss_buc_paired_t(t_observed = NA, N = 40),
+               "single finite numeric value", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = Inf, n = 20),
+               "single finite numeric value", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20, assurance = NA),
+               "single finite numeric value", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, n = 20,
+                                    alpha_prior = c(.05, .10)),
+               "single finite numeric value", fixed = TRUE)
+  expect_error(ss_buc_paired_t(t_observed = 3, N = NA),
+               "whole number", fixed = TRUE)
+})
+
+test_that("degenerate sample sizes are rejected before any qt/qf call", {
+  # rm designs: N = 1 used to reach qf() with 0 denominator df (NaN) and die
+  # with "missing value where TRUE/FALSE needed".
+  expect_error(ss_buc_rm_anova(F_observed = 200, N = 1, levels_A = 3,
+                               alpha_prior = 1, assurance = .5),
+               "at least 2", fixed = TRUE)
+  expect_error(ss_buc_rm_anova_general(F_observed = 200, N = 1,
+                                       df_numerator = 2),
+               "at least 2", fixed = TRUE)
+  # independent t: N = 3 used to reach qt() with 0 df on the round-down branch.
+  expect_error(ss_buc_independent_t(t_observed = 3, N = 3),
+               "at least 4", fixed = TRUE)
+})
+
+test_that("a prior 'N' too small for the design is rejected with a clear message", {
+  expect_error(ss_buc_one_way_anova(F_observed = 5, N = 5, levels_A = 4),
+               "too small", fixed = TRUE)
+  expect_error(ss_buc_mixed_anova(F_observed = 5, N = 3, levels_between = 2,
+                                  levels_within = 3, effect = "within"),
+               "too small", fixed = TRUE)
+  expect_error(ss_buc_factorial_anova_general(F_observed = 5, N = 11, cells = 6,
+                                              df_numerator = 2, df_denominator = 5),
+               "too small", fixed = TRUE)
+})
+
+test_that("every remaining documented guard fires with its message", {
+  # Data-driven sweep of the stop() branches not covered by the targeted tests
+  # above: one row per (call, fixed substring the error must contain). The
+  # nonsignificant-statistic rows are the load-bearing ones; if one of those
+  # guards silently vanished, planning would proceed from a nonsignificant
+  # prior.
+  guard_cases <- list(
+    # validator: percentages above 100 are out of range after the coercion
+    list(quote(ss_buc_independent_t(t_observed = 3, n = 20, assurance = 150)),
+         "There is a problem with 'assurance'"),
+    list(quote(ss_buc_independent_t(t_observed = 3, n = 20, desired_power = 150)),
+         "There is a problem with 'desired_power'"),
+    # independent t structural guards
+    list(quote(ss_buc_independent_t(t_observed = 3, n = 20, N = 40)),
+         "should not specify 'n'"),
+    list(quote(ss_buc_independent_t(t_observed = 3, n = c(10, 10, 10))),
+         "vector of length two"),
+    # paired t
+    list(quote(ss_buc_paired_t(t_observed = 3)), "number of pairs"),
+    list(quote(ss_buc_paired_t(t_observed = 1, N = 40)), "nonsignificant"),
+    # one-way ANOVA
+    list(quote(ss_buc_one_way_anova(F_observed = 5, levels_A = 4)),
+         "must specify 'N'"),
+    list(quote(ss_buc_one_way_anova(F_observed = 5, N = 120)), "levels_A"),
+    list(quote(ss_buc_one_way_anova(F_observed = 1, N = 120, levels_A = 4)),
+         "nonsignificant"),
+    # factorial ANOVA
+    list(quote(ss_buc_factorial_anova(F_observed = 5, N = 120, levels_B = 3)),
+         "levels_A"),
+    list(quote(ss_buc_factorial_anova(F_observed = 5, N = 120, levels_A = 2)),
+         "levels_B"),
+    list(quote(ss_buc_factorial_anova(F_observed = 5, N = 10, levels_A = 2,
+                                      levels_B = 3)),
+         "too small"),
+    # factorial general
+    list(quote(ss_buc_factorial_anova_general(F_observed = 5, cells = 6,
+                                              df_numerator = 2,
+                                              df_denominator = 114)),
+         "must specify 'N'"),
+    list(quote(ss_buc_factorial_anova_general(F_observed = 1, N = 120,
+                                              cells = 6, df_numerator = 2,
+                                              df_denominator = 114)),
+         "nonsignificant"),
+    # within-subjects designs
+    list(quote(ss_buc_rm_anova(F_observed = 5, levels_A = 3)),
+         "must specify 'N'"),
+    list(quote(ss_buc_rm_anova(F_observed = 5, N = 60)), "levels_A"),
+    list(quote(ss_buc_rm_anova(F_observed = 1, N = 60, levels_A = 3)),
+         "nonsignificant"),
+    list(quote(ss_buc_rm_anova_general(F_observed = 5, df_numerator = 2)),
+         "must specify 'N'"),
+    list(quote(ss_buc_rm_anova_general(F_observed = 1, N = 60,
+                                       df_numerator = 2)),
+         "nonsignificant"),
+    # split-plot designs
+    list(quote(ss_buc_mixed_anova(F_observed = 5, levels_between = 2,
+                                  levels_within = 3)),
+         "must specify 'N'"),
+    list(quote(ss_buc_mixed_anova(F_observed = 5, N = 60,
+                                  levels_between = 2)),
+         "within-subjects factor"),
+    list(quote(ss_buc_mixed_anova(F_observed = 5, N = 60,
+                                  levels_within = 3)),
+         "between-subjects factor"),
+    list(quote(ss_buc_mixed_anova(F_observed = 1, N = 60, levels_between = 2,
+                                  levels_within = 3)),
+         "nonsignificant"),
+    list(quote(ss_buc_mixed_anova_general(F_observed = 5, df_numerator = 1,
+                                          num_groups = 2)),
+         "must specify 'N'"),
+    list(quote(ss_buc_mixed_anova_general(F_observed = 5, N = 60,
+                                          df_numerator = 1, num_groups = 2,
+                                          effect = "between_within")),
+         "df_num_within"),
+    list(quote(ss_buc_mixed_anova_general(F_observed = 5, N = 3,
+                                          df_numerator = 1, num_groups = 2)),
+         "too small"),
+    list(quote(ss_buc_mixed_anova_general(F_observed = 1, N = 60,
+                                          df_numerator = 1, num_groups = 2)),
+         "nonsignificant"),
+    # regression designs
+    list(quote(ss_buc_reg_coef(t_observed = 3, p = 3)), "total sample size"),
+    list(quote(ss_buc_reg_coef(t_observed = 1, N = 150, p = 3)),
+         "nonsignificant"),
+    list(quote(ss_buc_reg_coef(t_observed = 3, N = 10, p = 9)),
+         "degrees of freedom"),
+    list(quote(ss_buc_R2(F_observed = 5, p = 3)), "total sample size"),
+    list(quote(ss_buc_R2(F_observed = 1, N = 150, p = 3)), "nonsignificant"),
+    list(quote(ss_buc_reg_joint(F_observed = 5, N = 150, p = 3, p_joint = 4)),
+         "cannot exceed"),
+    list(quote(ss_buc_reg_joint(F_observed = 1, N = 150, p = 4, p_joint = 2)),
+         "nonsignificant"),
+    # an unrecognized effect value falls through .match_effect to
+    # .check_effect, whose message names the argument and its choices
+    list(quote(ss_buc_factorial_anova(F_observed = 5, N = 120, levels_A = 2,
+                                      levels_B = 3, effect = "bogus")),
+         "'effect' should be one of \"factor_A\", \"factor_B\", or \"interaction\"")
+  )
+  for (case in guard_cases) {
+    expect_error(suppressWarnings(eval(case[[1]])), case[[2]], fixed = TRUE,
+                 label = paste(deparse(case[[1]]), collapse = " "))
+  }
+})
+
+test_that("the Mode 2 zero-NCP message says alpha_prior is the only lever", {
+  # A barely significant prior has a ceiling below the .5 assurance floor, so
+  # the message must switch from "re-run at or below the ceiling" (Mode 1) to
+  # naming alpha_prior as the only remaining remedy.
+  expect_error(ss_buc_independent_t(t_observed = 2.03, n = 20,
+                                    assurance = .95),
+               "only remaining lever", fixed = TRUE)
+})
+
+test_that("the noncentrality safety cap warns and names the remedy", {
+  # A finite but absurd statistic drives the root past the 1e7 bracket cap;
+  # the planner warns (rather than looping forever) and asks the user to
+  # verify the inputs. The paired design has a single branch, so exactly one
+  # warning fires.
+  expect_warning(ss_buc_paired_t(t_observed = 5e7, N = 25),
+                 "verify", fixed = TRUE)
+})
+
+test_that("independent t without any prior sample size gets a friendly error", {
+  # Previously: raw 'argument "n" is missing' for neither, and the cryptic
+  # 'object DF_ru not found' for N = NULL with no n.
+  expect_error(ss_buc_independent_t(t_observed = 3),
+               "either 'n'", fixed = TRUE)
+  expect_error(ss_buc_independent_t(t_observed = 3, N = NULL),
+               "either 'n'", fixed = TRUE)
+})
+
+test_that("integer group sizes plan exactly as the same sizes stored as doubles", {
+  # n_1 + n_2 overflowed R's integer range for integer sizes above about
+  # 1.07e9, and the planner died with "missing value where TRUE/FALSE needed"
+  # (QC 2026-09-30, finding 12).
+  expect_identical(unclass(ss_buc_independent_t(3, n = c(1500000000L, 1500000000L))),
+                   unclass(ss_buc_independent_t(3, n = c(1.5e9, 1.5e9))))
+  expect_identical(unclass(ss_buc_independent_t(3, n = c(50L, 55L), assurance = .9)),
+                   unclass(ss_buc_independent_t(3, n = c(50, 55), assurance = .9)))
+})
+
+test_that("the regression and chi square planners never plan below their search floors", {
+  # The help pages state these floors (QC 2026-09-30, finding 15): p + 3 for
+  # the regression planners, the number of constraints plus 2 for the chi
+  # square difference test. Both priors are strong enough that a smaller
+  # study would reach the target (power .999 at N = 6 for the coefficient,
+  # .88 at N = 2 for the chi square test), so each plan sits on its floor.
+  expect_identical(ss_buc_reg_coef(t_observed = 80, N = 12, p = 4)$value[1], 7)
+  expect_identical(ss_buc_chisq_diff(chisq_observed = 400, N = 50, df_full = 3,
+                                     df_restricted = 7)$value[1], 6)
+})

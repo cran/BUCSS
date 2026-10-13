@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Ken Kelley, Samantha F. Anderson, and Scott E. Maxwell" />
+
+
+<title>Assurance and the Publication Bias Correction</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Assurance and the Publication Bias
+Correction</h1>
+<h4 class="author">Ken Kelley, Samantha F. Anderson, and Scott E.
+Maxwell</h4>
+
+
+
+<p>Two settings control how aggressively BUCSS corrects the prior
+study’s effect: <code>assurance</code> handles uncertainty, and
+<code>alpha_prior</code> handles publication bias. This vignette
+explains what each one does and shows how the recommended sample size
+responds as you turn each knob. The correction is described by Anderson,
+Kelley, and Maxwell (2017) and builds on the truncated noncentral
+distribution of Taylor and Muller (1996).</p>
+<div id="what-assurance-means-here" class="section level2">
+<h2>What Assurance Means Here</h2>
+<p>Assurance is the long run proportion of planned studies whose power
+reaches the target. Imagine the prior study drawn again and again from
+its literature, each draw seen only if it cleared the publication
+threshold that <code>alpha_prior</code> describes, and a new study
+planned from each one. At the true effect, some of those planned studies
+have at least the power you asked for and some fall short; assurance is
+the proportion that reach it. If you plan for 80% power with
+<code>assurance = .80</code>, about 80% of the studies planned this way
+have power of at least 80%.</p>
+<p>BUCSS delivers that proportion in a simple way. A planned study
+reaches its target power whenever the noncentrality parameter it was
+planned from is at or below the true one, because power rises with the
+effect (and, apart from rounding the sample size up to a whole number
+and from the smallest sample size a planner returns, the design’s own
+minimum or the Welch planner’s 10 per group, only then). So BUCSS plans
+from the lower limit of a one-sided confidence interval for the prior
+study’s noncentrality parameter, at a confidence level equal to the
+assurance, computed from the distribution of the prior statistic
+truncated at the publication threshold: the value at which a published
+prior study would exceed the observed statistic with probability
+<code>1 - assurance</code>, which Anderson, Kelley, and Maxwell (2017)
+call the <code>1 - assurance</code> quantile of the likelihood
+distribution. An interval at level .80 covers the true parameter in 80%
+of repetitions, and in each of those repetitions the plan is large
+enough.</p>
+<p>The term follows Kelley and Maxwell (2003), who used assurance in
+sample size planning for the probability that a confidence interval will
+be no wider than desired. Here it is the probability that the planned
+study’s power will be at least the desired power.</p>
+</div>
+<div id="assurance-correcting-for-uncertainty" class="section level2">
+<h2>Assurance: Correcting for Uncertainty</h2>
+<p>The value of <code>assurance</code> sets how much protection against
+uncertainty the plan carries:</p>
+<ul>
+<li><code>assurance = .5</code> selects the noncentrality parameter at
+which the observed statistic sits at the median of the
+publication-truncated distribution, a median unbiased estimate. This
+corrects for publication bias only; it does not add any cushion for
+uncertainty.</li>
+<li><code>assurance &gt; .5</code> selects instead a one-sided lower
+confidence bound at that level, which is a smaller, more conservative
+noncentrality parameter, and therefore a larger planned sample size. The
+extra sample size is the price of protecting against the chance that the
+prior estimate was lucky.</li>
+<li><code>assurance &lt; .5</code> is not recommended (the functions
+warn), because it implies under a 50% chance of reaching the desired
+power.</li>
+</ul>
+<p>Why does uncertainty call for a larger sample at all? Suppose for a
+moment there were no publication bias, so the reported effect were
+equally likely to fall above or below the true value. The two kinds of
+error do not cancel, because the sample size needed for a given level of
+power is a nonlinear function of the effect size. An overestimate leads
+you to plan too small a study and cuts power sharply, while an equally
+sized underestimate leads you to plan a larger study and raises power by
+less. Averaged over the ways a noisy estimate can come out, planning at
+face value loses more power than it gains, so protecting against
+uncertainty means shifting the plan toward a larger sample. That is
+exactly what assurance above .5 does.</p>
+<p>Watch the recommended per-group sample size climb as assurance rises,
+for a prior independent <em>t</em> test with <em>t</em> = 3.00 and 20
+per group:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>assurances <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">5</span>, .<span class="dv">6</span>, .<span class="dv">7</span>, .<span class="dv">8</span>, .<span class="dv">9</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>n_by_assurance <span class="ot">&lt;-</span> <span class="fu">sapply</span>(assurances, <span class="cf">function</span>(a) {</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">assurance =</span> a, <span class="at">desired_power =</span> .<span class="dv">80</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>  r<span class="sc">$</span>value[r<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_n_per_group&quot;</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>})</span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">assurance =</span> assurances, <span class="at">necessary_n_per_group =</span> n_by_assurance)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt;   assurance necessary_n_per_group</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a><span class="co">#&gt; 1       0.5                    25</span></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt; 2       0.6                    34</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 3       0.7                    55</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; 4       0.8                   130</span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 5       0.9                  5042</span></span></code></pre></div>
+<p>The climb is steep. A prior effect this uncertain calls for 130 per
+group at 80% assurance and over 5000 per group at 90%.</p>
+<div id="when-the-correction-cannot-be-made" class="section level3">
+<h3>When the Correction Cannot Be Made</h3>
+<p>Push assurance high enough on a weak or uncertain prior effect and
+the corrected noncentrality parameter is driven to zero. That is the
+method telling you the prior effect cannot be estimated with confidence
+at this level of assurance, so sample size planning is not possible with
+these settings. The function stops rather than returning a meaningless
+answer, and the error reports the largest assurance the prior result can
+support so you know exactly how far to step back:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Not run: this stops with an informative error.</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">assurance =</span> .<span class="dv">95</span>, <span class="at">desired_power =</span> .<span class="dv">80</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a><span class="co">#&gt; Error: Sample size planning is not possible with these settings. After</span></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co">#&gt; correcting the prior study&#39;s effect for publication bias and uncertainty</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; at the requested level of assurance, the corrected noncentrality</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; parameter is zero, which means there is not enough information in the</span></span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt; prior result to plan the sample size as desired. With this prior result</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; and &#39;alpha_prior&#39;, the largest &#39;assurance&#39; that still yields a usable</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; plan is about .90; re-run with &#39;assurance&#39; at or below that value, or</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; raise &#39;alpha_prior&#39; to lift the ceiling. Re-running at a lower</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; &#39;assurance&#39; is not free: the plan it returns carries that lower</span></span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; assurance, not the one you first asked for, so the long run proportion</span></span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="co">#&gt; of replications reaching your target power falls accordingly.</span></span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="co">#&gt; &#39;alpha_prior&#39; does not change the prior study, which is what it is; it</span></span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="co">#&gt; is your assumption about the publication threshold the study&#39;s</span></span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="co">#&gt; literature faced, so raising it toward 1 assumes less publication bias</span></span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a><span class="co">#&gt; to undo (for example, &#39;alpha_prior = .10&#39; assumes the literature&#39;s</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a><span class="co">#&gt; journals would have published a result significant at the .10 level, a</span></span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="co">#&gt; more lenient policy than .05, and &#39;alpha_prior = 1&#39; assumes no</span></span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt; publication bias at all). See Anderson, Kelley, and Maxwell (2017) and</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; Anderson and Kelley (2024).</span></span></code></pre></div>
+<p>The sentence about re-running at a lower assurance is worth dwelling
+on, because the first remedy looks cheaper than it is. Assurance is a
+promise about the long run: at .90, nine replications in ten reach your
+target power. If the prior result cannot support .90 and you re-run at
+.80, the plan you get is a perfectly good .80 plan, but it is an .80
+plan. You have not recovered the guarantee you wanted; you have accepted
+a smaller one in exchange for a feasible study. Raising
+<code>alpha_prior</code> is a different kind of move: it does not lower
+the guarantee, it changes an assumption about the literature the prior
+study came from, and it is defensible exactly to the extent that the
+assumption is.</p>
+<p>The reported ceiling is exact: the largest assurance a prior result
+can support is <code>1 - p/alpha_prior</code>, where <em>p</em> is the
+prior study’s <em>p</em> value (taken at the balanced design the planner
+plans from, when the prior study’s groups were unequal). Here that is
+about .90, so .95 is out of reach but .90 or below is fine. The two
+remedies are exactly the two knobs: lower the assurance to at or below
+the reported ceiling, or assume less publication bias by raising
+<code>alpha_prior</code>, which lifts the ceiling. When the ceiling is
+already at or below the .5 floor, only raising <code>alpha_prior</code>
+can help.</p>
+<p>Every successful call reports this same ceiling too, printed in the
+footer as “Largest supportable assurance”, so you can see how much
+headroom remains before the correction breaks down. The printed result
+also gives the implied total sample size for per-group and per-cell
+designs, saving you the multiplication.</p>
+</div>
+<div id="the-ceiling-drawn" class="section level3">
+<h3>The Ceiling, Drawn</h3>
+<p>The ceiling is easier to see than to read about, so
+<code>plot()</code> on any plan draws it. The method re-runs that plan’s
+own planner across a range of assurance values and shows what happens on
+the way to the wall.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">assurance =</span> .<span class="dv">80</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="fu">plot</span>(plan)</span></code></pre></div>
+<p><img role="img" aria-label="Two panels sharing an assurance axis. On the left, the adjusted noncentrality parameter falls from about 2.6 to zero as assurance rises from .5 to the ceiling at .905. On the right, the necessary sample size per group climbs from 25 to tens of thousands on a logarithmic scale over the same range. Both panels shade the region beyond the ceiling and label it as one where no plan exists." src="data:image/png;base64,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JGrFy6LSDOi+YcKhatWqFhX5066LeA+qV68eegzJGzFZgfcJHyjrKhS9VsZCLzLpxqt4hPe348KFC5amTZvqiQ78X4GCiv8/FBIwQoDj1wtqRv9ec/yyH885fnH8wv8qjl/P/7bEwJft8jC3nUsAeE+dOiVKqdJJcyNTOu6BH4v6ISpW+/PI3GeGaxAdCmH41Y/pKDUXPOArFpG/WJQK86KLjfLwoi44tSnICwd/R9tANK+qAOaLSNcA30pfi/ZnhIdaYRZ8EFmKQgLRIcDxy56e0b/XHL/sOfrqnpG/1xy/7N8Gfxq/qIDZP3vukQAJkAAJkAAJkAAJkAAJkIDLCDAIh8vQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIgARIgARIgARIgARIgARIwGUEqIC5DC0LJgESIAESIAESIAESIAESIAF7AlTA7HlwjwRIgARIgARIgARIgARIgARcRoAKmMvQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIgARIgARIgARIgARIgARIwGUEqIC5DC0LJgESIAESIAESIAESIAESIAF7AlTA7HlwjwRIgARIgARIgARIgARIgARcRoAKmMvQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIgARIgARIgARIgARIgARIwGUEqIC5DC0LJgESIAESIAESIAESIAESIAF7AlTA7HlwjwRIgARIgARIgARIgARIgARcRoAKmMvQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIgARIgARIgARIgARIgARIwGUEqIC5DC0LJgESIAESIAESIAESIAESIAF7AlTA7HlwjwRIgARIgARIgARIgARIgARcRoAKmMvQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIgARIgARIgARIgARIgARIwGUEqIC5DC0LJgESIAESIAESIAESIAESIAF7AlTA7HlwjwRIgARIgARIgARIgARIgARcRoAKmMvQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIgARIgARIgARIgARIgARIwGUEqIC5DC0LJgESIAESIAESIAESIAESIAF7AlTA7HlwjwRIgARIgARIgARIgARIgARcRoAKmMvQsmASIAESIAESIAESIAESIAESsCdABcyeB/dIINoEjh49KjFixJBs2bKJxWKJ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" alt="Two panels sharing an assurance axis. On the left, the adjusted noncentrality parameter falls from about 2.6 to zero as assurance rises from .5 to the ceiling at .905. On the right, the necessary sample size per group climbs from 25 to tens of thousands on a logarithmic scale over the same range. Both panels shade the region beyond the ceiling and label it as one where no plan exists." /></p>
+<p>The point is the shape. Assurance does not degrade gracefully as it
+rises: it hits a wall. On the left, the corrected noncentrality
+parameter, the quantity the correction actually solves for, falls to
+zero. On the right, the sample size that parameter implies grows
+asymptotically, and the vertical scale is logarithmic because it spans
+three orders of magnitude over a range of assurance a researcher might
+plausibly consider. The filled point is the plan itself, at
+<code>assurance = .80</code>, and the shaded band is the region where
+the planner refuses.</p>
+<p>That the sample size is finite everywhere left of the ceiling and
+undefined everywhere right of it is not an artifact of the software. It
+is what the prior result can and cannot support.</p>
+<p>Read from the same figure, the two remedies in the error message are
+the two things you can do to a wall. Lowering assurance moves the point
+left, along a curve that is very steep near the ceiling, which is why a
+small step back can buy a large reduction in sample size. Raising
+<code>alpha_prior</code> moves the wall itself to the right.</p>
+<p>The plotted values come back invisibly, so the figure can be redrawn
+with any other graphics system (the call also draws the sample size
+panel again, which is not repeated here):</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>curve_values <span class="ot">&lt;-</span> <span class="fu">plot</span>(plan, <span class="at">which =</span> <span class="st">&quot;size&quot;</span>, <span class="at">n_points =</span> <span class="dv">12</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">head</span>(curve_values, <span class="dv">4</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt;   assurance ncp_adjusted sample_size actual_power</span></span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt; 1 0.5000000    2.5934021          25    0.8108657</span></span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt; 2 0.6888979    1.7779261          51    0.8028359</span></span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 3 0.7897070    1.1784254         115    0.8034150</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; 4 0.8435058    0.7620142         272    0.8010077</span></span></code></pre></div>
+</div>
+</div>
+<div id="alpha_prior-modeling-publication-bias" class="section level2">
+<h2>alpha_prior: Modeling Publication Bias</h2>
+<p><code>alpha_prior</code> is the significance level a prior result had
+to reach to be published (more generally, to reach you): the correction
+assumes you see only results with <em>p</em> below
+<code>alpha_prior</code>, and it undoes the selection that assumption
+implies. Setting <code>alpha_prior = .05</code> assumes the field
+publishes results with <em>p</em> &lt; .05 and truncates the likelihood
+at that point. A larger value assumes a more permissive literature and
+therefore less severe bias.</p>
+<p>Setting <code>alpha_prior = 1</code> means there is no publication
+filter at all. Every <em>p</em> value is at most 1, so any result would
+have been published whatever its <em>p</em> value; there is then no
+publication bias to correct, and only the correction for uncertainty,
+set by <code>assurance</code>, remains. That is appropriate for a prior
+study that was never subject to the file drawer, such as a pilot study:
+Anderson, Kelley, and Maxwell (2017, p. 1552) note that the level can be
+set equal to 1 when publication bias is thought not to apply. So that a
+call says what it means, the value may also be written
+<code>&quot;No Publication Filter&quot;</code>, which is read as 1 and echoed as 1
+in the result:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>,</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>                     <span class="at">alpha_prior =</span> <span class="st">&quot;No Publication Filter&quot;</span>, <span class="at">assurance =</span> .<span class="dv">80</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>                     <span class="at">desired_power =</span> .<span class="dv">80</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">necessary_n_per_group</td>
+<td align="left">37</td>
+</tr>
+<tr class="even">
+<td align="left">total_N</td>
+<td align="left">74</td>
+</tr>
+<tr class="odd">
+<td align="left">actual_power</td>
+<td align="left">0.801</td>
+</tr>
+<tr class="even">
+<td align="left">ncp_adjusted</td>
+<td align="left">2.09</td>
+</tr>
+<tr class="odd">
+<td align="left">smd_planning</td>
+<td align="left">0.661</td>
+</tr>
+<tr class="even">
+<td align="left">t_observed</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">n</td>
+<td align="left">20</td>
+</tr>
+<tr class="even">
+<td align="left">alpha_prior</td>
+<td align="left">1</td>
+</tr>
+<tr class="odd">
+<td align="left">alpha_planned</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">assurance</td>
+<td align="left">0.8</td>
+</tr>
+<tr class="odd">
+<td align="left">desired_power</td>
+<td align="left">0.8</td>
+</tr>
+</tbody>
+</table>
+<p>Design: Independent t test; Sample size unit: per group; Largest
+supportable assurance: .99</p>
+<p>A dissertation study is a similar case, since it is typically
+completed and defended regardless of how the results turn out. Even a
+pilot study is not guaranteed to be bias-free, though. If the
+researchers would have gone on to the full study only after a promising
+pilot result, say <em>p</em> &lt; .25, then the pilot faced an informal
+filter of its own, and an <code>alpha_prior</code> between .05 and 1 may
+describe it better than either extreme. An intermediate value above .05
+also suits a prior effect that was not the original study’s focus, such
+as a secondary effect reported alongside a study’s main result, which
+usually faced a weaker publication filter than the headline effect
+did.</p>
+<p>Note that <code>alpha_prior</code> is not a confidence level and is
+distinct from <code>alpha_planned</code>, which is the Type I error rate
+of the study you are designing.</p>
+<p>Holding assurance at .80, watch the recommended sample size shrink as
+we assume less publication bias:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">05</span>, .<span class="dv">10</span>, .<span class="dv">20</span>, .<span class="dv">50</span>, <span class="dv">1</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>n_by_alpha <span class="ot">&lt;-</span> <span class="fu">sapply</span>(alphas, <span class="cf">function</span>(ap) {</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>  r <span class="ot">&lt;-</span> <span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">alpha_prior =</span> ap, <span class="at">assurance =</span> .<span class="dv">80</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>                   <span class="at">desired_power =</span> .<span class="dv">80</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>  r<span class="sc">$</span>value[r<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_n_per_group&quot;</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>})</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">alpha_prior =</span> alphas, <span class="at">necessary_n_per_group =</span> n_by_alpha)</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt;   alpha_prior necessary_n_per_group</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 1        0.05                   130</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 2        0.10                    64</span></span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt; 3        0.20                    48</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; 4        0.50                    40</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; 5        1.00                    37</span></span></code></pre></div>
+<p>Assuming the strongest bias (<code>alpha_prior = .05</code>) calls
+for 130 per group; assuming none (<code>alpha_prior = 1</code>) calls
+for 37.</p>
+</div>
+<div id="safeguard-power-as-a-special-case" class="section level2">
+<h2>Safeguard Power as a Special Case</h2>
+<p>Safeguard power (Perugini, Gallucci, &amp; Costantini, 2014) is a way
+of planning a new study from a prior study’s effect size that guards
+against the prior estimate being too large. Instead of planning for the
+effect size the prior study observed, the researcher plans for the lower
+limit of a two-sided 60% confidence interval around it, a limit that, in
+repeated sampling, falls below the true effect 80% of the time. The new
+study then keeps its intended power even if the true effect is somewhat
+smaller than the one observed. Safeguard power allows for uncertainty in
+the prior estimate but not for publication bias.</p>
+<p>It is BUCSS with <code>alpha_prior = 1</code> and
+<code>assurance = .80</code>, that is, BUCSS without the publication
+bias correction, at an assurance of .80, and seeing why shows what each
+setting does.</p>
+<ul>
+<li>With <code>alpha_prior = 1</code> there is no publication filter,
+since no <em>p</em> value exceeds 1, so the truncation disappears and
+the truncated distribution of the prior statistic is its ordinary
+distribution.</li>
+<li>At <code>assurance = .80</code> the adjusted noncentrality parameter
+is then the value at which the observed statistic sits at the .80
+quantile of that distribution: the lower limit of a one-sided 80%
+confidence interval, which is the lower limit of a two-sided 60%
+interval, since either way 20% is left below it.</li>
+<li>The plan is the smallest sample size whose ordinary power at that
+value reaches the target, which is what safeguard power prescribes.</li>
+</ul>
+<p>For a paired <em>t</em> of 3.00 with 30 pairs, the lower limit of the
+60% interval can be found directly by inverting the noncentral
+<em>t</em> distribution, and the ordinary power analysis at that limit
+gives the safeguard plan:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>t_obs <span class="ot">&lt;-</span> <span class="dv">3</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">30</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co"># The lower limit of a two-sided interval at confidence level C: the</span></span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co"># noncentrality parameter at which the observed t is the (1 + C)/2 quantile.</span></span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>lower_limit <span class="ot">&lt;-</span> <span class="cf">function</span>(C) {</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>  <span class="fu">uniroot</span>(<span class="cf">function</span>(ncp) <span class="fu">pt</span>(t_obs, <span class="at">df =</span> N <span class="sc">-</span> <span class="dv">1</span>, <span class="at">ncp =</span> ncp) <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">+</span> C) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>          <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>), <span class="at">tol =</span> <span class="fl">1e-10</span>)<span class="sc">$</span>root</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>}</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co"># Ordinary power of a paired t test with n pairs, at a noncentrality</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co"># parameter stated for the prior study&#39;s N pairs.</span></span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>power_at <span class="ot">&lt;-</span> <span class="cf">function</span>(n, ncp) {</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  crit <span class="ot">&lt;-</span> <span class="fu">qt</span>(.<span class="dv">975</span>, <span class="at">df =</span> n <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>  delta <span class="ot">&lt;-</span> ncp <span class="sc">*</span> <span class="fu">sqrt</span>(n <span class="sc">/</span> N)</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>  (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pt</span>(crit, <span class="at">df =</span> n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">ncp =</span> delta)) <span class="sc">+</span> <span class="fu">pt</span>(<span class="sc">-</span>crit, <span class="at">df =</span> n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">ncp =</span> delta)</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>}</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>safeguard_n <span class="ot">&lt;-</span> <span class="cf">function</span>(ncp) {</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">power_at</span>(n, ncp) <span class="sc">&lt;</span> .<span class="dv">80</span>) n <span class="ot">&lt;-</span> n <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>  n</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>}</span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>limit_60 <span class="ot">&lt;-</span> <span class="fu">lower_limit</span>(.<span class="dv">60</span>)</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>plan_sg <span class="ot">&lt;-</span> <span class="fu">ss_buc_paired_t</span>(<span class="at">t_observed =</span> t_obs, <span class="at">N =</span> N, <span class="at">alpha_prior =</span> <span class="dv">1</span>,</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>                           <span class="at">assurance =</span> .<span class="dv">80</span>)</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">method =</span> <span class="fu">c</span>(<span class="st">&quot;safeguard power&quot;</span>, <span class="st">&quot;BUCSS, alpha_prior = 1&quot;</span>),</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>           <span class="at">ncp =</span> <span class="fu">c</span>(limit_60, <span class="fu">row_value</span>(plan_sg, <span class="st">&quot;ncp_adjusted&quot;</span>)),</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>           <span class="at">necessary_N =</span> <span class="fu">c</span>(<span class="fu">safeguard_n</span>(limit_60),</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>                           <span class="fu">row_value</span>(plan_sg, <span class="st">&quot;necessary_N&quot;</span>)))</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a><span class="co">#&gt;                   method      ncp necessary_N</span></span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a><span class="co">#&gt; 1        safeguard power 2.069878          57</span></span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a><span class="co">#&gt; 2 BUCSS, alpha_prior = 1 2.069874          57</span></span></code></pre></div>
+<p>In general, the lower limit of a two-sided interval at confidence
+level C is <code>assurance = (1 + C)/2</code>: a 60% interval is
+assurance .80, an 80% interval is .90, and a 90% interval is .95. The
+same prior shows the correspondence at each level:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>levels_C <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">60</span>, .<span class="dv">80</span>, .<span class="dv">90</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a>  <span class="at">confidence_level =</span> levels_C,</span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>  <span class="at">assurance =</span> (<span class="dv">1</span> <span class="sc">+</span> levels_C) <span class="sc">/</span> <span class="dv">2</span>,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>  <span class="at">interval_lower_limit =</span> <span class="fu">sapply</span>(levels_C, lower_limit),</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>  <span class="at">ncp_adjusted =</span> <span class="fu">sapply</span>(levels_C, <span class="cf">function</span>(C) {</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>    plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_paired_t</span>(<span class="at">t_observed =</span> t_obs, <span class="at">N =</span> N, <span class="at">alpha_prior =</span> <span class="dv">1</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>                            <span class="at">assurance =</span> (<span class="dv">1</span> <span class="sc">+</span> C) <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>    <span class="fu">row_value</span>(plan, <span class="st">&quot;ncp_adjusted&quot;</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a>  }))</span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;   confidence_level assurance interval_lower_limit ncp_adjusted</span></span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt; 1              0.6      0.80             2.069878     2.069874</span></span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 2              0.8      0.90             1.598418     1.598360</span></span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a><span class="co">#&gt; 3              0.9      0.95             1.209421     1.208942</span></span></code></pre></div>
+<p>For an <em>F</em> or chi square statistic on more than one degree of
+freedom the two agree exactly: there is no sign, and the adjusted
+noncentrality parameter is the interval’s lower limit. The differences
+that remain all make the BUCSS plan the same as the safeguard plan or
+larger, never smaller. One applies to the <em>t</em> tests and to every
+effect on one degree of freedom: BUCSS bounds the size of the effect
+whatever its sign, so its interval is computed from the magnitude of
+<em>t</em>, where the signed interval that safeguard power describes is
+computed from <em>t</em> itself. The difference is the chance of a
+<em>t</em> at least as extreme in the opposite direction, which is
+negligible for a convincing prior result and not for a weak one; it is
+why the two columns above differ in their later decimals. It lowers the
+adjusted noncentrality parameter, by more as the prior result weakens.
+At the safeguard <code>assurance = .80</code>, for a prior on two or
+more degrees of freedom and as a percentage of the parameter on the
+<em>F</em> scale (on the <em>t</em> scale that the <em>t</em> planners
+report, each percentage is about half as large), the magnitude of
+<em>t</em> lowers it by less than 0.005% for a prior significant at .01,
+by 0.3% to 0.7% at the .05 threshold (0.6% to 0.7% for a prior on 5 or
+more degrees of freedom), by about 6% to 7% at .10, and by 29% to 30% at
+.15. A <em>t</em> test whose two-sided <em>p</em> value is .20 or more
+is declined by BUCSS at <code>assurance = .80</code>, because with no
+publication filter the largest assurance a result supports is 1 -
+<em>p</em>, while the signed interval’s lower limit stays above zero
+until <em>p</em> reaches .40, with plans that run to thousands of
+participants.</p>
+<p>The sample size a plan needs is close to inversely proportional to
+the parameter on the <em>F</em> scale, so the plan grows by about the
+same proportion before it is rounded up to a whole participant. The plan
+can therefore equal the safeguard plan (7,823 pairs either way for a
+paired <em>t</em> significant at .01 with 3,000 pairs), be a little
+larger (20 per group rather than 19 for an independent <em>t</em> at the
+.05 threshold with 4 per group), or be much larger for a weak prior. The
+same comparison for a prior of 30 pairs at several two-sided <em>p</em>
+values shows the growth:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>p_prior <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">01</span>, .<span class="dv">05</span>, .<span class="dv">10</span>, .<span class="dv">15</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>t_prior <span class="ot">&lt;-</span> <span class="fu">qt</span>(<span class="dv">1</span> <span class="sc">-</span> p_prior <span class="sc">/</span> <span class="dv">2</span>, <span class="at">df =</span> N <span class="sc">-</span> <span class="dv">1</span>)</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>signed_limit <span class="ot">&lt;-</span> <span class="fu">sapply</span>(t_prior, <span class="cf">function</span>(t) {</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>  <span class="fu">uniroot</span>(<span class="cf">function</span>(ncp) <span class="fu">pt</span>(t, <span class="at">df =</span> N <span class="sc">-</span> <span class="dv">1</span>, <span class="at">ncp =</span> ncp) <span class="sc">-</span> .<span class="dv">80</span>, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>          <span class="at">tol =</span> <span class="fl">1e-10</span>)<span class="sc">$</span>root</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>})</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>plans_1 <span class="ot">&lt;-</span> <span class="fu">lapply</span>(t_prior, <span class="cf">function</span>(t) {</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>  <span class="fu">ss_buc_paired_t</span>(<span class="at">t_observed =</span> t, <span class="at">N =</span> N, <span class="at">alpha_prior =</span> <span class="dv">1</span>, <span class="at">assurance =</span> .<span class="dv">80</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>})</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="at">p_value =</span> p_prior,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>  <span class="at">signed_limit =</span> signed_limit,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>  <span class="at">ncp_adjusted =</span> <span class="fu">sapply</span>(plans_1, row_value, <span class="at">term =</span> <span class="st">&quot;ncp_adjusted&quot;</span>),</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>  <span class="at">safeguard_N =</span> <span class="fu">sapply</span>(signed_limit, safeguard_n),</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  <span class="at">bucss_N =</span> <span class="fu">sapply</span>(plans_1, row_value, <span class="at">term =</span> <span class="st">&quot;necessary_N&quot;</span>))</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a><span class="co">#&gt;   p_value signed_limit ncp_adjusted safeguard_N bucss_N</span></span>
+<span id="cb9-17"><a href="#cb9-17" tabindex="-1"></a><span class="co">#&gt; 1    0.01    1.8378649    1.8378347          72      72</span></span>
+<span id="cb9-18"><a href="#cb9-18" tabindex="-1"></a><span class="co">#&gt; 2    0.05    1.1563764    1.1524878         179     180</span></span>
+<span id="cb9-19"><a href="#cb9-19" tabindex="-1"></a><span class="co">#&gt; 3    0.10    0.8223431    0.7936462         351     376</span></span>
+<span id="cb9-20"><a href="#cb9-20" tabindex="-1"></a><span class="co">#&gt; 4    0.15    0.6087670    0.5093695         638     910</span></span></code></pre></div>
+<p>Two further differences can make the BUCSS plan larger. The first is
+that BUCSS reads an unbalanced prior design as a balanced one. When only
+the prior total is given and it does not divide evenly among the groups
+or cells, BUCSS rounds the per-group or per-cell size both down and up
+and returns the larger plan, which can make the plan larger by up to
+about the proportion that rounding up adds to the prior size, less than
+1/<em>n</em> for a prior study of about <em>n</em> per group or cell,
+again before the plan is rounded up. When the independent <em>t</em>
+planner is given two unequal group sizes, it reads the prior as two
+groups of their harmonic mean, rounded down and up, on those balanced
+designs’ degrees of freedom rather than on the prior study’s own (the
+two sizes’ sum less 2). The harmonic mean falls further below half the
+total the more unequal the sizes, and fewer degrees of freedom lower the
+limit. For similar sizes this adds little beyond the rounding, but for
+very unequal sizes it can add much more, most when the harmonic mean is
+small. A <em>t</em> of 3.00 from groups of 4 and 100, whose harmonic
+mean is 7.69, shows the difference:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>n_prior <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">100</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co"># Ordinary power of an independent t test with n per group at a standardized</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co"># mean difference d.</span></span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>power_ind <span class="ot">&lt;-</span> <span class="cf">function</span>(n, d) {</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>  crit <span class="ot">&lt;-</span> <span class="fu">qt</span>(.<span class="dv">975</span>, <span class="at">df =</span> <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">2</span>)</span>
+<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a>  delta <span class="ot">&lt;-</span> d <span class="sc">*</span> <span class="fu">sqrt</span>(n <span class="sc">/</span> <span class="dv">2</span>)</span>
+<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a>  (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">pt</span>(crit, <span class="at">df =</span> <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">2</span>, <span class="at">ncp =</span> delta)) <span class="sc">+</span></span>
+<span id="cb10-8"><a href="#cb10-8" tabindex="-1"></a>    <span class="fu">pt</span>(<span class="sc">-</span>crit, <span class="at">df =</span> <span class="dv">2</span> <span class="sc">*</span> n <span class="sc">-</span> <span class="dv">2</span>, <span class="at">ncp =</span> delta)</span>
+<span id="cb10-9"><a href="#cb10-9" tabindex="-1"></a>}</span>
+<span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co"># Safeguard power with the 60% limit read on &#39;df&#39; and restated as a</span></span>
+<span id="cb10-11"><a href="#cb10-11" tabindex="-1"></a><span class="co"># standardized mean difference by the factor &#39;to_d&#39;.</span></span>
+<span id="cb10-12"><a href="#cb10-12" tabindex="-1"></a>safeguard_ind <span class="ot">&lt;-</span> <span class="cf">function</span>(df, to_d) {</span>
+<span id="cb10-13"><a href="#cb10-13" tabindex="-1"></a>  limit <span class="ot">&lt;-</span> <span class="fu">uniroot</span>(<span class="cf">function</span>(ncp) <span class="fu">pt</span>(<span class="dv">3</span>, <span class="at">df =</span> df, <span class="at">ncp =</span> ncp) <span class="sc">-</span> .<span class="dv">80</span>, <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">10</span>),</span>
+<span id="cb10-14"><a href="#cb10-14" tabindex="-1"></a>                   <span class="at">tol =</span> <span class="fl">1e-10</span>)<span class="sc">$</span>root</span>
+<span id="cb10-15"><a href="#cb10-15" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="dv">2</span></span>
+<span id="cb10-16"><a href="#cb10-16" tabindex="-1"></a>  <span class="cf">while</span> (<span class="fu">power_ind</span>(n, limit <span class="sc">*</span> to_d) <span class="sc">&lt;</span> .<span class="dv">80</span>) n <span class="ot">&lt;-</span> n <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb10-17"><a href="#cb10-17" tabindex="-1"></a>  n</span>
+<span id="cb10-18"><a href="#cb10-18" tabindex="-1"></a>}</span>
+<span id="cb10-19"><a href="#cb10-19" tabindex="-1"></a>harmonic <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">prod</span>(n_prior) <span class="sc">/</span> <span class="fu">sum</span>(n_prior)</span>
+<span id="cb10-20"><a href="#cb10-20" tabindex="-1"></a>plan_unequal <span class="ot">&lt;-</span> <span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> n_prior,</span>
+<span id="cb10-21"><a href="#cb10-21" tabindex="-1"></a>                                     <span class="at">alpha_prior =</span> <span class="dv">1</span>, <span class="at">assurance =</span> .<span class="dv">80</span>)</span>
+<span id="cb10-22"><a href="#cb10-22" tabindex="-1"></a><span class="fu">data.frame</span>(</span>
+<span id="cb10-23"><a href="#cb10-23" tabindex="-1"></a>  <span class="at">prior_read_as =</span> <span class="fu">c</span>(<span class="st">&quot;groups of 4 and 100, df 102&quot;</span>, <span class="st">&quot;7 per group, df 12&quot;</span>,</span>
+<span id="cb10-24"><a href="#cb10-24" tabindex="-1"></a>                    <span class="st">&quot;8 per group, df 14&quot;</span>, <span class="st">&quot;BUCSS, alpha_prior = 1&quot;</span>),</span>
+<span id="cb10-25"><a href="#cb10-25" tabindex="-1"></a>  <span class="at">necessary_n_per_group =</span> <span class="fu">c</span>(</span>
+<span id="cb10-26"><a href="#cb10-26" tabindex="-1"></a>    <span class="fu">safeguard_ind</span>(<span class="fu">sum</span>(n_prior) <span class="sc">-</span> <span class="dv">2</span>, <span class="fu">sqrt</span>(<span class="fu">sum</span>(<span class="dv">1</span> <span class="sc">/</span> n_prior))),</span>
+<span id="cb10-27"><a href="#cb10-27" tabindex="-1"></a>    <span class="fu">safeguard_ind</span>(<span class="dv">2</span> <span class="sc">*</span> <span class="fu">floor</span>(harmonic) <span class="sc">-</span> <span class="dv">2</span>, <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">/</span> <span class="fu">floor</span>(harmonic))),</span>
+<span id="cb10-28"><a href="#cb10-28" tabindex="-1"></a>    <span class="fu">safeguard_ind</span>(<span class="dv">2</span> <span class="sc">*</span> <span class="fu">ceiling</span>(harmonic) <span class="sc">-</span> <span class="dv">2</span>, <span class="fu">sqrt</span>(<span class="dv">2</span> <span class="sc">/</span> <span class="fu">ceiling</span>(harmonic))),</span>
+<span id="cb10-29"><a href="#cb10-29" tabindex="-1"></a>    <span class="fu">row_value</span>(plan_unequal, <span class="st">&quot;necessary_n_per_group&quot;</span>)))</span>
+<span id="cb10-30"><a href="#cb10-30" tabindex="-1"></a><span class="co">#&gt;                 prior_read_as necessary_n_per_group</span></span>
+<span id="cb10-31"><a href="#cb10-31" tabindex="-1"></a><span class="co">#&gt; 1 groups of 4 and 100, df 102                    15</span></span>
+<span id="cb10-32"><a href="#cb10-32" tabindex="-1"></a><span class="co">#&gt; 2          7 per group, df 12                    16</span></span>
+<span id="cb10-33"><a href="#cb10-33" tabindex="-1"></a><span class="co">#&gt; 3          8 per group, df 14                    18</span></span>
+<span id="cb10-34"><a href="#cb10-34" tabindex="-1"></a><span class="co">#&gt; 4      BUCSS, alpha_prior = 1                    18</span></span></code></pre></div>
+<p>Safeguard power at the prior study’s own design plans 15 per group.
+Read as two groups of 7, which rounds the harmonic mean down and so
+favors a smaller plan, the prior already plans 16 on its 12 degrees of
+freedom; read as two groups of 8 on 14 degrees of freedom it plans 18,
+which is the BUCSS plan.</p>
+<p>The second is the Welch planner’s minimum of 10 per group, which can
+make its plan larger. For the regression planners, the equivalence holds
+in the frame <code>random_predictors</code> names: with sampled
+predictors, both the interval and the power analysis use the
+distribution with random predictors.</p>
+<p>With <code>alpha_prior</code> below 1, BUCSS applies the same
+construction to the publication-truncated distribution, which is what
+the publication bias correction adds to safeguard power; and with
+<code>assurance = .5</code> it plans from the median unbiased estimate
+rather than from a lower limit.</p>
+</div>
+<div id="seeing-the-assurance-claim-exercised" class="section level2">
+<h2>Seeing the Assurance Claim Exercised</h2>
+<p>Everything above is a claim about a long run that a user planning one
+study never gets to watch. <code>ss_buc_sensitivity()</code> lets you
+watch it on your own numbers. It reads the design and the planning
+inputs off a plan, simulates prior studies of that design from a true
+effect you name, discards the ones a literature would not have
+published, runs the same planner on each survivor, and reports what
+happened.</p>
+<p>You have to name the true effect; there is deliberately no default,
+because defaulting to the corrected estimate would ask the method to
+grade its own answer. The value goes on the same scale as the plan’s own
+<code>ncp_adjusted</code>, so that number is the natural anchor.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_paired_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">N =</span> <span class="dv">30</span>, <span class="at">assurance =</span> .<span class="dv">80</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>ncp <span class="ot">&lt;-</span> plan<span class="sc">$</span>value[plan<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;ncp_adjusted&quot;</span>]</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>ncp</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt; [1] 0.9753901</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>audit <span class="ot">&lt;-</span> <span class="fu">ss_buc_sensitivity</span>(plan, <span class="at">true_ncp =</span> ncp, <span class="at">replications =</span> <span class="dv">2000</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>                            <span class="at">seed =</span> <span class="dv">2017</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>audit</span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a><span class="co">#&gt;  term                          value  </span></span>
+<span id="cb11-9"><a href="#cb11-9" tabindex="-1"></a><span class="co">#&gt;  true_ncp                      0.975  </span></span>
+<span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="co">#&gt;  ncp_adjusted                  0.975  </span></span>
+<span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="co">#&gt;  replications                  2000   </span></span>
+<span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt;  publication_rate              0.157  </span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt;  refusal_rate                  0.692  </span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt;  attainment                    0.356  </span></span>
+<span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt;  attainment_mcse               0.0193 </span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt;  attainment_with_refusals      0.802  </span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt;  attainment_with_refusals_mcse 0.00892</span></span>
+<span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt;  size_at_true_effect           250    </span></span>
+<span id="cb11-19"><a href="#cb11-19" tabindex="-1"></a><span class="co">#&gt;  size_q25                      61.8   </span></span>
+<span id="cb11-20"><a href="#cb11-20" tabindex="-1"></a><span class="co">#&gt;  size_median                   138    </span></span>
+<span id="cb11-21"><a href="#cb11-21" tabindex="-1"></a><span class="co">#&gt;  size_q75                      434    </span></span>
+<span id="cb11-22"><a href="#cb11-22" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb11-23"><a href="#cb11-23" tabindex="-1"></a><span class="co">#&gt; Design: Dependent (paired) t test</span></span>
+<span id="cb11-24"><a href="#cb11-24" tabindex="-1"></a><span class="co">#&gt; Sample size unit: number of pairs</span></span>
+<span id="cb11-25"><a href="#cb11-25" tabindex="-1"></a><span class="co">#&gt; Requested assurance: .80</span></span>
+<span id="cb11-26"><a href="#cb11-26" tabindex="-1"></a><span class="co">#&gt; Target power: .80</span></span></code></pre></div>
+<p>Two attainment rates are reported, and the gap between them is the
+point. <code>attainment_with_refusals</code> lands on the requested
+assurance within simulation error (here .802, with a Monte Carlo
+standard error of .0089), because that is the quantity the guarantee is
+about: a refusal counts as attaining, since declining to plan is the
+limiting case of an arbitrarily conservative plan.
+<code>attainment</code> counts only the prior studies for which a plan
+was actually issued, and it is lower, often much lower: here .356 (Monte
+Carlo standard error .019), because the method refuses .692 (Monte Carlo
+standard error .01) of the simulated published prior results as too weak
+to plan from. That is what a user experiences, and it is the visible
+price of a method that refuses rather than guesses. Its expected value
+is <code>(assurance - refusal_rate)/(1 - refusal_rate)</code>.</p>
+<p>The most useful thing to do with this function is to run it more than
+once, at the corrected estimate and at values below it, and watch how
+fast the attainment falls when the truth is smaller than the correction
+assumed. What it cannot tell you is whether the distributional
+assumption behind a design is right, since the simulation shares that
+assumption.</p>
+</div>
+<div id="practical-guidance" class="section level2">
+<h2>Practical Guidance</h2>
+<ul>
+<li>Make the corrections as minimal as you can defend. Each knob trades
+a modeling assumption for a smaller sample, and overstating either bias
+or uncertainty inflates the study unnecessarily.</li>
+<li><code>assurance = .80</code> is a common, defensible choice. Reserve
+very high assurance for cases where a failed replication is especially
+costly, and expect the required sample size to grow quickly.</li>
+<li>Choose <code>alpha_prior</code> to reflect the publishing threshold
+in the prior study’s field. Use <code>alpha_prior = 1</code> only when
+you genuinely believe the prior study escaped publication bias.</li>
+</ul>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Anderson, S. F., &amp; Kelley, K. (2024). Sample size planning for
+replication studies: The devil is in the design. <em>Psychological
+Methods, 29</em>, 844–867. <a href="https://doi.org/10.1037/met0000520" class="uri">https://doi.org/10.1037/met0000520</a></p>
+<p>Anderson, S. F., Kelley, K., &amp; Maxwell, S. E. (2017). Sample-size
+planning for more accurate statistical power: A method adjusting sample
+effect sizes for publication bias and uncertainty. <em>Psychological
+Science, 28</em>, 1547–1562. <a href="https://doi.org/10.1177/0956797617723724" class="uri">https://doi.org/10.1177/0956797617723724</a></p>
+<p>Kelley, K., &amp; Maxwell, S. E. (2003). Sample size for multiple
+regression: Obtaining regression coefficients that are accurate, not
+simply significant. <em>Psychological Methods, 8</em>, 305–321. <a href="https://doi.org/10.1037/1082-989X.8.3.305" class="uri">https://doi.org/10.1037/1082-989X.8.3.305</a></p>
+<p>Perugini, M., Gallucci, M., &amp; Costantini, G. (2014). Safeguard
+power as a protection against imprecise power estimates.
+<em>Perspectives on Psychological Science, 9</em>, 319–332. <a href="https://doi.org/10.1177/1745691614528519" class="uri">https://doi.org/10.1177/1745691614528519</a></p>
+<p>Taylor, D. J., &amp; Muller, K. E. (1996). Bias in linear model power
+and sample size calculation due to estimating noncentrality.
+<em>Communications in Statistics: Theory and Methods, 25</em>,
+1595–1610. <a href="https://doi.org/10.1080/03610929608831787" class="uri">https://doi.org/10.1080/03610929608831787</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

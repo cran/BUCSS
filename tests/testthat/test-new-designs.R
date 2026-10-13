@@ -1,0 +1,350 @@
+# The designs added after the original twelve. Each is either an exact
+# relabeling of an existing planner (verified by identity) or new plumbing
+# (verified against a hand computation), plus the contract every planner
+# shares.
+
+test_that("the one-sample t planner is the paired t planner relabeled", {
+  one <- ss_buc_one_sample_t(t_observed = 3, N = 40)
+  pair <- ss_buc_paired_t(t_observed = 3, N = 40)
+  expect_equal(one$value[one$term == "necessary_N"],
+               pair$value[pair$term == "necessary_N"])
+  expect_equal(one$value[one$term == "ncp_adjusted"],
+               pair$value[pair$term == "ncp_adjusted"])
+  expect_equal(one$value[one$term == "actual_power"],
+               pair$value[pair$term == "actual_power"])
+  expect_identical(attr(one, "design"), "One-sample t test")
+  expect_identical(attr(one, "sample_size_unit"), "total")
+  # pinned value (equal to the paired planner's documented example)
+  expect_equal(one$value[one$term == "necessary_N"], 255)
+})
+
+test_that("the correlation planner matches its own t form", {
+  r_form <- ss_buc_correlation(r_observed = .35, N = 100)
+  t_form <- ss_buc_correlation(t_observed = .35 * sqrt(98 / (1 - .35^2)), N = 100)
+  expect_equal(r_form$value[r_form$term == "necessary_N"],
+               t_form$value[t_form$term == "necessary_N"])
+  expect_equal(r_form$value[r_form$term == "ncp_adjusted"],
+               t_form$value[t_form$term == "ncp_adjusted"])
+  expect_equal(r_form$value[r_form$term == "necessary_N"], 122)
+  # a correlation of 1 or more is not a correlation
+  expect_error(ss_buc_correlation(r_observed = 1, N = 100), "between -1 and 1",
+               fixed = TRUE)
+  expect_error(ss_buc_correlation(N = 100), "either 'r_observed'", fixed = TRUE)
+  expect_error(ss_buc_correlation(r_observed = .3, t_observed = 3, N = 100),
+               "not both", fixed = TRUE)
+})
+
+test_that("the correlation planner uses the random-predictor distribution", {
+  # A correlation samples both variables, so its statistic follows a
+  # chi square mixture of noncentral F distributions rather than a noncentral
+  # F. The mixture is more dispersed, so it calls for a slightly larger plan
+  # than the fixed-predictor (regression slope) calculation does.
+  t_obs <- .35 * sqrt(98 / (1 - .35^2))
+  cor_plan <- ss_buc_correlation(t_observed = t_obs, N = 100)
+  reg_plan <- ss_buc_reg_coef(t_observed = t_obs, N = 100, p = 1)
+  expect_gt(cor_plan$value[cor_plan$term == "necessary_N"],
+            reg_plan$value[reg_plan$term == "necessary_N"])
+  expect_equal(reg_plan$value[reg_plan$term == "necessary_N"], 119)
+
+  # At a zero effect the mixture is the central F, so the two frames report
+  # the same assurance ceiling. Every example's stated ceiling depends on it.
+  expect_equal(attr(cor_plan, "assurance_ceiling"),
+               attr(reg_plan, "assurance_ceiling"))
+
+  # The exact mixture distribution, against an independent computation: the
+  # chi square mixture written out as a quadrature over equal-probability
+  # strata of the sampled predictor's spread.
+  by_quadrature <- function(q, n, rho2, M = 200000L) {
+    cc <- rho2 / (1 - rho2)
+    w <- qchisq((seq_len(M) - 0.5) / M, df = n - 1)
+    mean(pf(q, 1, n - 2, ncp = cc * w))
+  }
+  # The comparison is absolute rather than relative because the quadrature is
+  # the less accurate of the two: its own error is of order 1e-7 at this
+  # number of strata, while the closed form is exact to machine precision.
+  for (n in c(6, 25, 300)) for (rho in c(.1, .4, .7)) {
+    expect_lt(abs(BUCSS:::.p_correlation_f(2.5, n, rho^2) -
+                    by_quadrature(2.5, n, rho^2)), 5e-7)
+  }
+  # and it reduces to the central F when the effect is zero
+  expect_equal(BUCSS:::.p_correlation_f(2.5, 40, 0), pf(2.5, 1, 38))
+
+  # actual_power is the exact power of the reported plan
+  n_plan <- cor_plan$value[cor_plan$term == "necessary_N"]
+  ncp <- cor_plan$value[cor_plan$term == "ncp_adjusted"]
+  expect_equal(cor_plan$value[cor_plan$term == "actual_power"],
+               1 - BUCSS:::.p_correlation_f(qf(.95, 1, n_plan - 2), n_plan,
+                                            ncp / (ncp + 100)))
+  expect_gte(cor_plan$value[cor_plan$term == "actual_power"], .80)
+})
+
+test_that("VIG-5: treating a correlation's predictor as fixed overstates power by about 1/n", {
+  # The correlation vignette says that planning as though the statistic were
+  # a plain noncentral F overstates the planned study's power by roughly 1/n
+  # for a plan of n participants, "about .01 at n = 100, .02 at 50, .05 at
+  # 20, and .10 at 10 (for the regression plan of 119 above, about .009)".
+  # None of the five figures was computed or pinned. Each anchor is the
+  # effect at which the fixed-predictor power is exactly .80 at that n; the
+  # sampled-predictor power there was computed 2026-10-12 without BUCSS, by
+  # adaptive quadrature over the predictor's chi square and again by a
+  # midpoint rule (they agree to 2e-9).
+  fixed_power <- function(n, c2) pf(qf(.95, 1, n - 2), 1, n - 2, ncp = c2 * n,
+                                    lower.tail = FALSE)
+  sampled_power <- function(n, c2)
+    1 - BUCSS:::.p_correlation_f(qf(.95, 1, n - 2), n, c2 / (1 + c2))
+  anchors <- list(list(n = 100, sampled = 0.7895669381, stated = .01),
+                  list(n = 50, sampled = 0.7792775829, stated = .02),
+                  list(n = 20, sampled = 0.7492689440, stated = .05),
+                  list(n = 10, sampled = 0.7022645946, stated = .10))
+  for (a in anchors) {
+    c2 <- uniroot(function(c) fixed_power(a$n, c) - .80, c(1e-6, 5), tol = 1e-14)$root
+    expect_lt(abs(sampled_power(a$n, c2) - a$sampled), 1e-8)
+    overstated <- .80 - sampled_power(a$n, c2)
+    expect_equal(round(overstated, 2), a$stated)
+    # "roughly 1/n": the overstatement times n is between .86 and 1.05.
+    expect_gt(overstated * a$n, .86)
+    expect_lt(overstated * a$n, 1.05)
+  }
+
+  # The vignette's own regression plan: 119 participants planned in the fixed
+  # frame from r = .35 and N = 100, whose reported power of .8032 is .7944
+  # with the predictor sampled, .0088 lower (independent check 2026-10-12:
+  # .803183391, .794386824, and .008796566).
+  reg_plan <- ss_buc_reg_coef(t_observed = .35 * sqrt(98 / (1 - .35^2)), N = 100, p = 1,
+                              random_predictors = FALSE)
+  n <- reg_plan$value[reg_plan$term == "necessary_N"]
+  lambda <- reg_plan$value[reg_plan$term == "ncp_adjusted"]
+  reported <- reg_plan$value[reg_plan$term == "actual_power"]
+  expect_identical(n, 119)
+  expect_equal(reported, 0.803183391, tolerance = 1e-8)
+  expect_equal(reported, fixed_power(n, lambda / 100), tolerance = 1e-12)
+  delivered <- sampled_power(n, lambda / 100)
+  expect_lt(abs(delivered - 0.794386824), 1e-8)
+  expect_equal(round(reported - delivered, 4), .0088)
+  expect_equal(round(reported - delivered, 3), .009)
+})
+
+test_that("the ANCOVA planner reduces to the ANOVA planner with no covariates", {
+  none <- ss_buc_ancova(F_observed = 6, N = 120, cells = 3, n_covariates = 0)
+  anova <- ss_buc_one_way_anova(F_observed = 6, N = 120, levels_A = 3)
+  expect_equal(none$value[none$term == "necessary_n_per_cell"],
+               anova$value[anova$term == "necessary_n_per_group"])
+  expect_equal(none$value[none$term == "ncp_adjusted"],
+               anova$value[anova$term == "ncp_adjusted"])
+
+  # covariates cost error degrees of freedom, so they call for a larger sample
+  two <- ss_buc_ancova(F_observed = 6, N = 120, cells = 3, n_covariates = 2)
+  expect_gte(two$value[two$term == "necessary_n_per_cell"],
+             none$value[none$term == "necessary_n_per_cell"])
+  # the planned study's error df carry the covariates through
+  expect_equal(attr(two, "df_error"),
+               two$value[two$term == "total_N"] - 3 - 2)
+  expect_equal(two$value[two$term == "necessary_n_per_cell"], 154)
+  # a single-degree-of-freedom contrast among the adjusted means
+  contrast <- ss_buc_ancova(F_observed = 9, N = 120, cells = 3,
+                            n_covariates = 2, df_numerator = 1)
+  expect_equal(attr(contrast, "df_effect"), 1)
+  expect_error(ss_buc_ancova(F_observed = 6, N = 120, cells = 3),
+               "n_covariates", fixed = TRUE)
+})
+
+test_that("the multivariate planner agrees with itself through T squared", {
+  f_form <- ss_buc_manova(F_observed = 4.5, N = 80, p_variables = 3)
+  t2_form <- ss_buc_manova(T2_observed = 4.5 * 3 * 78 / 76, N = 80, p_variables = 3)
+  # the design results agree; only the echoed input row differs (F versus T2)
+  design_rows <- c("necessary_n_per_group", "total_N", "actual_power",
+                   "ncp_adjusted", "D2_planning")
+  expect_equal(f_form$value[f_form$term %in% design_rows],
+               t2_form$value[t2_form$term %in% design_rows])
+  # one outcome variable is the equal-variance two-group t test: the same plan,
+  # with the noncentrality on the F scale (lambda) rather than the t scale
+  # (delta), so lambda equals delta squared
+  uni <- ss_buc_manova(F_observed = 9, N = 80, p_variables = 1)
+  tt <- ss_buc_independent_t(t_observed = 3, N = 80)
+  expect_equal(uni$value[uni$term == "necessary_n_per_group"],
+               tt$value[tt$term == "necessary_n_per_group"])
+  expect_equal(uni$value[uni$term == "ncp_adjusted"],
+               tt$value[tt$term == "ncp_adjusted"]^2)
+  expect_equal(attr(f_form, "df_effect"), 3)
+  expect_equal(attr(f_form, "df_error"),
+               2 * f_form$value[f_form$term == "necessary_n_per_group"] - 3 - 1)
+  expect_error(ss_buc_manova(F_observed = 4.5, N = 80), "p_variables",
+               fixed = TRUE)
+  expect_error(ss_buc_manova(F_observed = 4.5, N = 6, p_variables = 6),
+               "degrees of freedom", fixed = TRUE)
+})
+
+test_that("the chi square difference planner matches a hand computation", {
+  res <- ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 42,
+                           df_restricted = 43)
+  ncp <- res$value[res$term == "ncp_adjusted"]
+  size <- res$value[res$term == "necessary_N"]
+  # the noncentrality is linear in N, and the test has no denominator df
+  crit <- qchisq(.95, df = 1)
+  expect_equal(res$value[res$term == "actual_power"],
+               1 - pchisq(crit, df = 1, ncp = (size / 250) * ncp))
+  expect_lt(1 - pchisq(crit, df = 1, ncp = ((size - 1) / 250) * ncp), .80)
+  expect_null(attr(res, "df_error"))
+  expect_equal(attr(res, "df_effect"), 1)
+  # the ceiling is the same closed form as everywhere else
+  p_prior <- 1 - pchisq(9.5, df = 1)
+  expect_equal(attr(res, "assurance_ceiling"), 1 - p_prior / .05)
+  expect_error(ss_buc_chisq_diff(chisq_observed = 1, N = 250, df_full = 42,
+                                 df_restricted = 43),
+               "nonsignificant", fixed = TRUE)
+})
+
+test_that("the Welch planner reduces sensibly and responds to the variance ratio", {
+  equal_sd <- ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_ratio = 1)
+  pooled <- ss_buc_independent_t(t_observed = 3, n = c(40, 55))
+  # Welch degrees of freedom are smaller than pooled, so the Welch plan is a
+  # little more conservative, but the two must be close
+  expect_gte(equal_sd$value[equal_sd$term == "necessary_n_per_group"],
+             pooled$value[pooled$term == "necessary_n_per_group"] - 5)
+  expect_lte(equal_sd$value[equal_sd$term == "necessary_n_per_group"],
+             pooled$value[pooled$term == "necessary_n_per_group"] + 15)
+  # a more discrepant variance ratio needs more participants
+  ratio_2 <- ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_ratio = 2)
+  expect_gt(ratio_2$value[ratio_2$term == "necessary_n_per_group"],
+            equal_sd$value[equal_sd$term == "necessary_n_per_group"])
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40), "n_1", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_ratio = 0),
+               "positive", fixed = TRUE)
+})
+
+test_that("every new planner honors the shared result contract", {
+  results <- list(
+    ss_buc_correlation(r_observed = .35, N = 100),
+    ss_buc_one_sample_t(t_observed = 3, N = 40),
+    ss_buc_ancova(F_observed = 6, N = 120, cells = 3, n_covariates = 2),
+    ss_buc_manova(F_observed = 4.5, N = 80, p_variables = 3),
+    ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 42,
+                           df_restricted = 43),
+    ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_ratio = 1.5)
+  )
+  for (res in results) {
+    expect_s3_class(res, "bucss_plan")
+    expect_type(res$value, "double")
+    expect_true(res$term[1] %in% BUCSS:::.BUCSS_SIZE_TERMS)
+    expect_true(all(c("actual_power", "ncp_adjusted", "alpha_prior",
+                      "alpha_planned", "assurance", "desired_power") %in% res$term))
+    expect_null(attr(res, "inputs"))
+    expect_false(is.null(attr(res, "design")))
+    expect_false(is.null(attr(res, "sample_size_unit")))
+    expect_false(is.null(attr(res, "assurance_ceiling")))
+    # the power of the reported plan is never below what was asked for
+    expect_gte(res$value[res$term == "actual_power"],
+               res$value[res$term == "desired_power"])
+    # the shared verbs and display all work
+    expect_identical(nrow(tidy(res)), 1L)
+    expect_identical(nrow(glance(res)), 1L)
+    expect_type(planning_sentence(res), "character")
+    expect_output(print(res), "Design: ", fixed = TRUE)
+    expect_identical(res[[1]], res$value[res$term %in% BUCSS:::.BUCSS_SIZE_TERMS][1])
+  }
+})
+
+test_that("the new planners reject an assurance above their ceiling", {
+  # this prior supports assurance up to about .993
+  expect_error(ss_buc_correlation(r_observed = .35, N = 100, assurance = .999),
+               "noncentrality parameter is zero", fixed = TRUE)
+  expect_error(ss_buc_manova(F_observed = 4.5, N = 80, p_variables = 3,
+                             assurance = .95),
+               "noncentrality parameter is zero", fixed = TRUE)
+  expect_error(ss_buc_chisq_diff(chisq_observed = 9.5, N = 250,
+                                 df_full = 42, df_restricted = 43,
+                                 assurance = .99),
+               "noncentrality parameter is zero", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55,
+                              sd_ratio = 1.5, assurance = .95),
+               "noncentrality parameter is zero", fixed = TRUE)
+})
+
+test_that("the chi square planner refuses an omnibus model fit test", {
+  # An omnibus fit chi square compares a model against the saturated model,
+  # which has zero degrees of freedom. Requiring both models' degrees of
+  # freedom rather than only their difference is what makes that detectable,
+  # and the function refuses rather than planning from an inverted selection
+  # region.
+  expect_error(ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 0,
+                                 df_restricted = 43),
+               "omnibus test of model fit", fixed = TRUE)
+  # the arguments must be in the right order, since reversing them would
+  # silently plan from a negative number of constraints
+  expect_error(ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 43,
+                                 df_restricted = 42),
+               "must be greater than", fixed = TRUE)
+  expect_error(ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 42,
+                                 df_restricted = 42),
+               "must be greater than", fixed = TRUE)
+  # both are required
+  expect_error(ss_buc_chisq_diff(chisq_observed = 9.5, N = 250,
+                                 df_restricted = 43),
+               "must specify 'df_full'", fixed = TRUE)
+  expect_error(ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 42),
+               "must specify 'df_restricted'", fixed = TRUE)
+  # only the difference drives the answer, so any pair with the same gap agrees
+  a <- ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 42,
+                         df_restricted = 43)
+  b <- ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 7,
+                         df_restricted = 8)
+  design_rows <- c("necessary_N", "actual_power", "ncp_adjusted")
+  expect_equal(a$value[a$term %in% design_rows],
+               b$value[b$term %in% design_rows])
+  expect_equal(attr(a, "df_effect"), 1)
+})
+
+test_that("the Welch planner takes the spread three equivalent ways", {
+  by_ratio <- ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_ratio = 1.5)
+  by_sd <- ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_1 = 8.4,
+                          sd_2 = 12.6)
+  by_var <- ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, var_1 = 70.56,
+                           var_2 = 158.76)
+  design_rows <- c("necessary_n_per_group", "total_N", "actual_power",
+                   "ncp_adjusted", "smd_planning")
+  expect_equal(by_sd$value[by_sd$term %in% design_rows],
+               by_ratio$value[by_ratio$term %in% design_rows])
+  expect_equal(by_var$value[by_var$term %in% design_rows],
+               by_ratio$value[by_ratio$term %in% design_rows])
+  # only the ratio matters, so the unit of the standard deviations does not
+  scaled <- ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_1 = 84,
+                           sd_2 = 126)
+  expect_equal(scaled$value[scaled$term %in% design_rows],
+               by_ratio$value[by_ratio$term %in% design_rows])
+  # the form the user chose is echoed back, and only that form
+  expect_true(all(c("sd_1", "sd_2") %in% by_sd$term))
+  expect_false("sd_ratio" %in% by_sd$term)
+  expect_true(all(c("var_1", "var_2") %in% by_var$term))
+  expect_false("sd_ratio" %in% by_var$term)
+  expect_true("sd_ratio" %in% by_ratio$term)
+
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55,
+                              sd_ratio = 1.5, sd_1 = 1, sd_2 = 2),
+               "one way only", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_1 = 1,
+                              var_1 = 1, var_2 = 2),
+               "one way only", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_1 = 1),
+               "both 'sd_1' and 'sd_2'", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, var_2 = 1),
+               "both 'var_1' and 'var_2'", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, sd_1 = -1,
+                              sd_2 = 2),
+               "must be positive numbers", fixed = TRUE)
+  expect_error(ss_buc_welch_t(t_observed = 3, n_1 = 40, n_2 = 55, var_1 = 0,
+                              var_2 = 2),
+               "must be positive numbers", fixed = TRUE)
+})
+
+test_that("the chi square planner will not plan fewer cases than constraints", {
+  # A very strong prior used to drive the search to N = 3 for a test releasing
+  # 8 constraints, which cannot fit the models. The search floor is now the
+  # number of constraints plus two.
+  res <- ss_buc_chisq_diff(chisq_observed = 400, N = 60, df_full = 42,
+                    df_restricted = 50)
+  expect_gte(res$value[res$term == "necessary_N"], 10)
+  # the floor does not disturb ordinary cases
+  ordinary <- ss_buc_chisq_diff(chisq_observed = 9.5, N = 250, df_full = 42,
+                           df_restricted = 43)
+  expect_equal(ordinary$value[ordinary$term == "necessary_N"], 726)
+})

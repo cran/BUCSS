@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Ken Kelley, Samantha F. Anderson, and Scott E. Maxwell" />
+
+
+<title>Planning a Correlation Study</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Planning a Correlation Study</h1>
+<h4 class="author">Ken Kelley, Samantha F. Anderson, and Scott E.
+Maxwell</h4>
+
+
+
+<p>A Pearson correlation is one of the most commonly reported effects in
+the social sciences, and one of the most commonly replicated. Suppose a
+published study of 100 participants reported a correlation of <em>r</em>
+= .35, and you want to plan a study powered to find that relationship
+again. How large should it be? As with every planner in this package,
+the reported correlation should not be taken at face value: it was
+selected for publication in part because it was large, so planning from
+it without correction tends to yield a study that is too small.
+<code>ss_buc_correlation()</code> applies the bias and uncertainty
+correction of Anderson, Kelley, and Maxwell (2017), which reads the
+prior result as a draw from a distribution truncated at the publication
+threshold (Taylor &amp; Muller, 1996), and returns the total sample size
+the replication needs.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>first_plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_correlation</span>(<span class="at">r_observed =</span> .<span class="dv">35</span>, <span class="at">N =</span> <span class="dv">100</span>, <span class="at">alpha_prior =</span> .<span class="dv">05</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a>                                 <span class="at">alpha_planned =</span> .<span class="dv">05</span>, <span class="at">assurance =</span> .<span class="dv">80</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>                                 <span class="at">desired_power =</span> .<span class="dv">80</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a>first_plan</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">necessary_N</td>
+<td align="left">122</td>
+</tr>
+<tr class="even">
+<td align="left">actual_power</td>
+<td align="left">0.802</td>
+</tr>
+<tr class="odd">
+<td align="left">ncp_adjusted</td>
+<td align="left">6.71</td>
+</tr>
+<tr class="even">
+<td align="left">rho_planning</td>
+<td align="left">0.251</td>
+</tr>
+<tr class="odd">
+<td align="left">r_observed</td>
+<td align="left">0.35</td>
+</tr>
+<tr class="even">
+<td align="left">N</td>
+<td align="left">100</td>
+</tr>
+<tr class="odd">
+<td align="left">alpha_prior</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">alpha_planned</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="odd">
+<td align="left">assurance</td>
+<td align="left">0.8</td>
+</tr>
+<tr class="even">
+<td align="left">desired_power</td>
+<td align="left">0.8</td>
+</tr>
+</tbody>
+</table>
+<p>Design: Pearson correlation; Sample size unit: total; Largest
+supportable assurance: .99</p>
+<p>The returned <code>necessary_N</code> is the total sample size and
+<code>ncp_adjusted</code> the bias and uncertainty adjusted
+noncentrality parameter. <code>rho_planning</code> is the planning
+effect size, the adjusted correlation the plan is built on given the
+prior result, <code>alpha_prior</code>, and <code>assurance</code> (not
+an estimate of the population correlation to report),
+<code>sqrt(ncp_adjusted / (ncp_adjusted + N))</code> with the prior
+study’s <em>N</em>: here .251, against the published .35. A study of 122
+participants has exactly the returned <code>actual_power</code> when the
+population correlation is .251. For the meaning of
+<code>assurance</code> and <code>alpha_prior</code>, and how each moves
+the recommended sample size, see
+<code>vignette(&quot;understanding-assurance&quot;, package = &quot;BUCSS&quot;)</code>.
+Briefly, raising assurance buys protection against an unlucky prior
+estimate at the cost of a larger study:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>assurances <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">5</span>, .<span class="dv">7</span>, .<span class="dv">8</span>, .<span class="dv">9</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>sizes <span class="ot">&lt;-</span> <span class="fu">sapply</span>(assurances, <span class="cf">function</span>(a) {</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>  plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_correlation</span>(<span class="at">r_observed =</span> .<span class="dv">35</span>, <span class="at">N =</span> <span class="dv">100</span>, <span class="at">assurance =</span> a)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>  plan<span class="sc">$</span>value[plan<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_N&quot;</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>})</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">assurance =</span> assurances, <span class="at">necessary_N =</span> sizes)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;   assurance necessary_N</span></span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt; 1       0.5          64</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt; 2       0.7          92</span></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co">#&gt; 3       0.8         122</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="co">#&gt; 4       0.9         205</span></span></code></pre></div>
+<div id="a-correlation-is-not-a-regression-slope" class="section level2">
+<h2>A Correlation Is Not a Regression Slope</h2>
+<p>The test of whether a correlation differs from zero is arithmetically
+the test of the slope in a simple regression, so it is tempting to plan
+a correlation study with the single-coefficient regression planner,
+treating the predictor as fixed. Doing so gives a slightly different,
+and slightly too small, answer:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>t_equivalent <span class="ot">&lt;-</span> .<span class="dv">35</span> <span class="sc">*</span> <span class="fu">sqrt</span>(<span class="dv">98</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">35</span><span class="sc">^</span><span class="dv">2</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>by_correlation <span class="ot">&lt;-</span> <span class="fu">ss_buc_correlation</span>(<span class="at">t_observed =</span> t_equivalent, <span class="at">N =</span> <span class="dv">100</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>by_regression  <span class="ot">&lt;-</span> <span class="fu">ss_buc_reg_coef</span>(<span class="at">t_observed =</span> t_equivalent, <span class="at">N =</span> <span class="dv">100</span>, <span class="at">p =</span> <span class="dv">1</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>                                  <span class="at">random_predictors =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="fu">c</span>(<span class="at">correlation =</span> by_correlation<span class="sc">$</span>value[by_correlation<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_N&quot;</span>],</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  <span class="at">regression  =</span> by_regression<span class="sc">$</span>value[by_regression<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_N&quot;</span>])</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt; correlation  regression </span></span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt;         122         119</span></span></code></pre></div>
+<p>The gap is small here, three participants, but it is systematic (only
+near the assurance ceiling does it reverse, and then by a few percent,
+which can be hundreds of participants because plans there are very
+large), and the reason is worth understanding because it decides which
+planner is correct for your design.</p>
+<p>The regression planner, with <code>random_predictors = FALSE</code>,
+is exact when the predictor is <strong>fixed by design</strong>: the
+researcher chooses the values of the predictor, as in an experiment with
+assigned doses. A correlation study is different. It <strong>samples
+both variables</strong>, and the sampled spread of the predictor is
+itself random from study to study. Conditional on the spread that
+happens to be drawn, the test statistic is a noncentral <em>F</em>, but
+its noncentrality parameter rises and falls with that spread, which
+follows a chi square distribution on <em>N</em> - 1 degrees of freedom.
+The distribution that actually governs the statistic is therefore a
+mixture of noncentral <em>F</em> distributions, not a single one, and a
+mixture is more spread out than its center. The two frames give the same
+estimates, and the same distribution when there is no effect, but
+different power when there is one (Sampson, 1974; Gatsonis &amp;
+Sampson, 1989; Kelley &amp; Maxwell, 2003). Planning as though the
+statistic were a plain noncentral <em>F</em> overstates the planned
+study’s power by roughly 1/<em>n</em> for a plan of <em>n</em>
+participants: about .01 at <em>n</em> = 100, .02 at 50, .05 at 20, and
+.10 at 10 (for the regression plan of 119 above, about .009). It
+therefore returns a sample size that is a few participants short; the
+correct plan is typically 2 to 5 participants larger, and 1 to 3 larger
+for the smallest plans.</p>
+<p><code>ss_buc_correlation()</code> uses the mixture. It has an exact
+closed form (the Poisson weights that build the noncentral <em>F</em>
+become negative binomial weights when mixed over the chi square), so the
+returned sample size is exact for bivariate normal data rather than an
+approximation. The rule of thumb is simple:</p>
+<ul>
+<li>If both variables are sampled, as in an observational correlation
+study, use <code>ss_buc_correlation()</code>.</li>
+<li>If the predictor is fixed by the design, the effect is a regression
+slope, and <code>ss_buc_reg_coef()</code> with <code>p = 1</code> and
+<code>random_predictors = FALSE</code> is the planner for it. With
+<code>random_predictors = TRUE</code> the same call returns exactly what
+<code>ss_buc_correlation()</code> returns, and the multiple regression
+planners use the same mixture for several sampled predictors.</li>
+</ul>
+<p>You may supply the prior result either as the correlation
+<code>r_observed</code> or as its <em>t</em> statistic
+<code>t_observed</code>; the two are equivalent.</p>
+</div>
+<div id="assuming-less-publication-bias" class="section level2">
+<h2>Assuming Less Publication Bias</h2>
+<p><code>alpha_prior</code> is the significance level a prior result had
+to reach to be published, so it encodes how strongly publication bias is
+assumed to have shaped the prior literature. The default of .05 assumes
+the field publishes results significant at the .05 level; a larger value
+assumes a more permissive literature and therefore a smaller correction.
+A prior study that escaped the file drawer entirely, such as a
+registered report or a pilot, is described by
+<code>alpha_prior = 1</code>: no <em>p</em> value exceeds 1, so that
+means no publication filter at all, and only the correction for
+uncertainty, set by <code>assurance</code>, remains.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>alphas <span class="ot">&lt;-</span> <span class="fu">c</span>(.<span class="dv">05</span>, .<span class="dv">20</span>, <span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>sizes <span class="ot">&lt;-</span> <span class="fu">sapply</span>(alphas, <span class="cf">function</span>(ap) {</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_correlation</span>(<span class="at">r_observed =</span> .<span class="dv">35</span>, <span class="at">N =</span> <span class="dv">100</span>, <span class="at">alpha_prior =</span> ap)</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>  plan<span class="sc">$</span>value[plan<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_N&quot;</span>]</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>})</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">alpha_prior =</span> alphas, <span class="at">necessary_N =</span> sizes)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt;   alpha_prior necessary_N</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="co">#&gt; 1        0.05         122</span></span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt; 2        0.20         108</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; 3        1.00         103</span></span></code></pre></div>
+</div>
+<div id="auditing-the-plan-by-simulation" class="section level2">
+<h2>Auditing the Plan by Simulation</h2>
+<p>The plan above rests on a promise about the long run: at
+<code>assurance = .80</code>, about 80% of studies planned this way
+should reach the target power. That promise is easy to state and hard to
+picture. <code>ss_buc_sensitivity()</code> makes it concrete by
+simulating the very process the correction models. It draws many prior
+studies from a true effect you name, keeps only the ones a literature
+would have published, re-plans from each survivor, and reports how often
+those plans actually attain the target.</p>
+<p>You must name the true effect; there is no default, because letting
+the method assume the corrected estimate is true would be asking it to
+grade its own work. A natural first choice is the plan’s own corrected
+parameter, which asks “if the correction happened to be exactly right,
+how would plans built this way behave?”</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>plan <span class="ot">&lt;-</span> <span class="fu">ss_buc_correlation</span>(<span class="at">r_observed =</span> .<span class="dv">35</span>, <span class="at">N =</span> <span class="dv">100</span>, <span class="at">assurance =</span> .<span class="dv">80</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>ncp <span class="ot">&lt;-</span> plan<span class="sc">$</span>value[plan<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;ncp_adjusted&quot;</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>audit <span class="ot">&lt;-</span> <span class="fu">ss_buc_sensitivity</span>(plan, <span class="at">true_ncp =</span> ncp, <span class="at">replications =</span> <span class="dv">2000</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>                            <span class="at">seed =</span> <span class="dv">2017</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>audit</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="co">#&gt;  term                          value  </span></span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;  true_ncp                      6.71   </span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt;  ncp_adjusted                  6.71   </span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt;  replications                  2000   </span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;  publication_rate              0.718  </span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;  refusal_rate                  0.324  </span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt;  attainment                    0.708  </span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;  attainment_mcse               0.0124 </span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt;  attainment_with_refusals      0.803  </span></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a><span class="co">#&gt;  attainment_with_refusals_mcse 0.00889</span></span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="co">#&gt;  size_at_true_effect           122    </span></span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a><span class="co">#&gt;  size_q25                      110    </span></span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a><span class="co">#&gt;  size_median                   212    </span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a><span class="co">#&gt;  size_q75                      564    </span></span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a><span class="co">#&gt; Design: Pearson correlation</span></span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a><span class="co">#&gt; Sample size unit: total</span></span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a><span class="co">#&gt; Requested assurance: .80</span></span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a><span class="co">#&gt; Target power: .80</span></span></code></pre></div>
+<p>Two attainment rates are reported, and the difference between them is
+the point of the exercise.</p>
+<ul>
+<li><strong><code>attainment_with_refusals</code></strong> is the
+fraction of published prior studies for which a plan built this way
+reaches the target, counting a refusal (a prior result too weak to plan
+from, which the function declines rather than guesses at) as a success,
+because declining is the most cautious plan of all. This is the quantity
+the assurance guarantee is about, and it lands on the requested
+<code>assurance</code> of .80 within simulation error: here it is .803,
+with a Monte Carlo standard error of .0089.</li>
+<li><strong><code>attainment</code></strong> is the same fraction among
+only the studies that received a plan. It is lower, .708 here (Monte
+Carlo standard error .012), because it excludes the refusals, and it is
+what a researcher who did get a plan actually experiences.</li>
+</ul>
+<p>The two are linked by the refusal rate reported alongside them:</p>
+<p><code>attainment_with_refusals = refusal_rate + (1 - refusal_rate) * attainment</code></p>
+<p>Here that is .324 + (1 - .324) times .708, or .803; the refusal
+rate’s own Monte Carlo standard error is .01. The two rates coincide
+when nothing is refused and separate as refusals rise. That separation
+is not a flaw in the method; it is the visible price of a method that
+refuses to plan from a prior result too weak to support the request,
+rather than returning a confident but hollow number.
+<code>size_at_true_effect</code> is the sample size the true effect
+really requires, the benchmark each simulated plan is measured against,
+and the quartiles show how widely the plans scatter around it.</p>
+<p>The most instructive use of the function is to vary the assumed
+truth. Ask what happens if the real correlation is smaller than the
+corrected estimate, which is the case a cautious planner most wants to
+guard against:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>smaller <span class="ot">&lt;-</span> <span class="fu">ss_buc_sensitivity</span>(plan, <span class="at">true_ncp =</span> ncp <span class="sc">*</span> <span class="fl">0.6</span>, <span class="at">replications =</span> <span class="dv">2000</span>,</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>                              <span class="at">seed =</span> <span class="dv">2017</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>rows <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;attainment_with_refusals&quot;</span>, <span class="st">&quot;attainment&quot;</span>, <span class="st">&quot;refusal_rate&quot;</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>          <span class="st">&quot;size_at_true_effect&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="fu">data.frame</span>(<span class="at">term =</span> rows, <span class="at">value =</span> smaller<span class="sc">$</span>value[<span class="fu">match</span>(rows, smaller<span class="sc">$</span>term)])</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt;                       term      value</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a><span class="co">#&gt; 1 attainment_with_refusals   0.803500</span></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a><span class="co">#&gt; 2               attainment   0.637788</span></span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a><span class="co">#&gt; 3             refusal_rate   0.457500</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="co">#&gt; 4      size_at_true_effect 200.000000</span></span></code></pre></div>
+<p>A smaller truth needs a larger study, 200 participants rather than
+122, yet <code>attainment_with_refusals</code> holds at .804 (Monte
+Carlo standard error .0089): the guarantee does not depend on the
+corrected estimate being right. What changes is how it is kept. More of
+the published prior results are now too weak to plan from, so the
+refusal rate rises to .458 (Monte Carlo standard error .011), and among
+the plans actually issued only .638 reach the target (Monte Carlo
+standard error .015).</p>
+</div>
+<div id="when-the-prior-result-cannot-support-the-request" class="section level2">
+<h2>When the Prior Result Cannot Support the Request</h2>
+<p>Every prior result has a largest assurance it can support, the
+closed-form value <code>1 - p/alpha_prior</code>, where <em>p</em> is
+the prior study’s <em>p</em> value. Ask for more and the correction
+drives the noncentrality parameter to zero: the prior effect cannot be
+distinguished from nothing at that level of confidence, so no sample
+size attains the target and the function stops rather than returning a
+meaningless answer. The strong prior used throughout this vignette
+supports assurance up to about .99, so this does not arise for it, but a
+weaker prior reaches its ceiling quickly. <code>plot()</code> on any
+plan draws the ceiling and the way the required sample size climbs
+toward it; see
+<code>vignette(&quot;understanding-assurance&quot;, package = &quot;BUCSS&quot;)</code> for
+that figure and a fuller discussion. A refusal is informative in its own
+right: it says the prior study cannot anchor a replication aimed at
+detecting the effect, and Anderson and Kelley (2024) describe the other
+goals a replication can have, each with its own sample size logic.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Anderson, S. F., &amp; Kelley, K. (2024). Sample size planning for
+replication studies: The devil is in the design. <em>Psychological
+Methods, 29</em>, 844–867. <a href="https://doi.org/10.1037/met0000520" class="uri">https://doi.org/10.1037/met0000520</a></p>
+<p>Anderson, S. F., Kelley, K., &amp; Maxwell, S. E. (2017). Sample-size
+planning for more accurate statistical power: A method adjusting sample
+effect sizes for publication bias and uncertainty. <em>Psychological
+Science, 28</em>, 1547–1562. <a href="https://doi.org/10.1177/0956797617723724" class="uri">https://doi.org/10.1177/0956797617723724</a></p>
+<p>Gatsonis, C., &amp; Sampson, A. R. (1989). Multiple correlation:
+Exact power and sample size calculations. <em>Psychological Bulletin,
+106</em>, 516–524. <a href="https://doi.org/10.1037/0033-2909.106.3.516" class="uri">https://doi.org/10.1037/0033-2909.106.3.516</a></p>
+<p>Kelley, K., &amp; Maxwell, S. E. (2003). Sample size for multiple
+regression: Obtaining regression coefficients that are accurate, not
+simply significant. <em>Psychological Methods, 8</em>, 305–321. <a href="https://doi.org/10.1037/1082-989X.8.3.305" class="uri">https://doi.org/10.1037/1082-989X.8.3.305</a></p>
+<p>Sampson, A. R. (1974). A tale of two regressions. <em>Journal of the
+American Statistical Association, 69</em>, 682–689. <a href="https://doi.org/10.1080/01621459.1974.10480189" class="uri">https://doi.org/10.1080/01621459.1974.10480189</a></p>
+<p>Taylor, D. J., &amp; Muller, K. E. (1996). Bias in linear model power
+and sample size calculation due to estimating noncentrality.
+<em>Communications in Statistics: Theory and Methods, 25</em>,
+1595–1610. <a href="https://doi.org/10.1080/03610929608831787" class="uri">https://doi.org/10.1080/03610929608831787</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

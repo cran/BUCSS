@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Ken Kelley, Samantha F. Anderson, and Scott E. Maxwell" />
+
+
+<title>Getting Started With BUCSS</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Getting Started With BUCSS</h1>
+<h4 class="author">Ken Kelley, Samantha F. Anderson, and Scott E.
+Maxwell</h4>
+
+
+
+<div id="why-not-plan-from-the-observed-effect-size" class="section level2">
+<h2>Why Not Plan From the Observed Effect Size?</h2>
+<p>A natural way to plan a new study is to take the effect size from a
+prior study and compute the sample size that would give, say, 80% power
+for an effect of that size. The trouble is that the prior effect size is
+rarely a trustworthy target, for two reasons.</p>
+<ul>
+<li><strong>Publication bias.</strong> The published literature is
+filtered. Studies that reached statistical significance are far more
+likely to appear in print than those that did not, so the effects you
+can read about are systematically larger than the effects that were
+actually run. Planning from a published estimate inherits that upward
+bias.</li>
+<li><strong>Uncertainty.</strong> Even without any filtering, a single
+study’s effect size is one draw from a sampling distribution. Treating
+that one number as if it were the population value ignores how much it
+could have come out differently.</li>
+</ul>
+<p>Both forces push the same way: they make the prior effect look bigger
+and more certain than it is, so a study planned at face value tends to
+be underpowered.</p>
+<p>The uncertainty piece is easy to underestimate. Even with no
+publication bias, the sample size needed for a target power is a
+nonlinear function of the effect size, so an overestimate reduces power
+(by planning too small a study) by more than an equally sized
+underestimate raises it (by planning a larger one). Symmetric error in
+the estimate therefore produces an asymmetric loss of power, which is
+why correcting for uncertainty, not just bias, matters.</p>
+</div>
+<div id="what-bucss-does" class="section level2">
+<h2>What BUCSS Does</h2>
+<p>BUCSS (“Bias and Uncertainty Corrected Sample Size”) corrects the
+prior study’s effect before planning. It uses the prior study’s test
+statistic and design to build the likelihood of a truncated noncentral
+distribution, truncated because small, nonsignificant effects go
+unpublished (Taylor &amp; Muller, 1996), then reads off a corrected
+noncentrality parameter at a chosen level of <em>assurance</em>. That
+corrected noncentrality parameter, rather than the face-value estimate,
+drives the sample size calculation for the planned study. The method is
+described in Anderson, Kelley, and Maxwell (2017), and Anderson and
+Kelley (2024) extend it to the design of replication studies.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(BUCSS)</span></code></pre></div>
+</div>
+<div id="a-first-example" class="section level2">
+<h2>A First Example</h2>
+<p>Suppose a prior study used an independent samples <em>t</em> test
+with 20 participants per group and reported <em>t</em> = 3.00. We want
+to plan a new study with 80% power, and we want 80% assurance, that is,
+we want the realized power to reach or exceed 80% in 80% of
+replications.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>result <span class="ot">&lt;-</span> <span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">alpha_prior =</span> .<span class="dv">05</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>                         <span class="at">alpha_planned =</span> .<span class="dv">05</span>, <span class="at">assurance =</span> .<span class="dv">80</span>, <span class="at">desired_power =</span> .<span class="dv">80</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>result</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">necessary_n_per_group</td>
+<td align="left">130</td>
+</tr>
+<tr class="even">
+<td align="left">total_N</td>
+<td align="left">260</td>
+</tr>
+<tr class="odd">
+<td align="left">actual_power</td>
+<td align="left">0.801</td>
+</tr>
+<tr class="even">
+<td align="left">ncp_adjusted</td>
+<td align="left">1.11</td>
+</tr>
+<tr class="odd">
+<td align="left">smd_planning</td>
+<td align="left">0.349</td>
+</tr>
+<tr class="even">
+<td align="left">t_observed</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">n</td>
+<td align="left">20</td>
+</tr>
+<tr class="even">
+<td align="left">alpha_prior</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="odd">
+<td align="left">alpha_planned</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">assurance</td>
+<td align="left">0.8</td>
+</tr>
+<tr class="odd">
+<td align="left">desired_power</td>
+<td align="left">0.8</td>
+</tr>
+</tbody>
+</table>
+<p>Design: Independent t test; Sample size unit: per group; Largest
+supportable assurance: .90</p>
+<p>The correction calls for 130 participants per group, far more than a
+face-value calculation from <em>t</em> = 3.00 would suggest.</p>
+</div>
+<div id="reading-the-result" class="section level2">
+<h2>Reading the Result</h2>
+<p>Every <code>ss_buc_*</code> planner returns a tidy object shaped like
+the result tables in the <strong>DMAR</strong> package:
+<code>term</code>/<code>value</code> rows holding the design results
+first (the necessary sample size, named for its unit; the implied total
+sample size where the unit is per group or per cell; the achieved power
+at the returned size; the bias and uncertainty adjusted noncentrality
+parameter; and the planning effect size, the effect size the plan is
+built on), followed by rows echoing the planning inputs, so the
+assumptions travel with the result. The print method shows the aligned
+table and closes with the design, for the regression planners the
+predictor frame, the unit, and the largest assurance the prior result
+can support. Because the object is an ordinary <code>data.frame</code>
+underneath, you can pull any quantity out directly:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>result<span class="sc">$</span>value[result<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;necessary_n_per_group&quot;</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a><span class="co">#&gt; [1] 130</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>result<span class="sc">$</span>value[result<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;ncp_adjusted&quot;</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; [1] 1.105023</span></span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>result<span class="sc">$</span>value[result<span class="sc">$</span>term <span class="sc">==</span> <span class="st">&quot;smd_planning&quot;</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt; [1] 0.3494388</span></span></code></pre></div>
+<p>The last of these, <code>smd_planning</code>, is the <strong>planning
+effect size</strong>, an adjusted effect size: the value, in the
+design’s usual effect size metric (here a standardized mean difference),
+used to plan the sample size given the situation at hand (the prior
+study’s result, the publication bias assumed through
+<code>alpha_prior</code>, and the uncertainty allowed for through
+<code>assurance</code>). It is the adjusted noncentrality parameter
+restated in that metric, and it is what the plan is built on, not an
+estimate of the population effect to report: above an assurance of .5 it
+is deliberately conservative (a lower confidence limit), and at .5 it is
+the median unbiased estimate. A study of 130 per group has exactly the
+returned <code>actual_power</code> when the standardized mean difference
+is 0.349. The prior study’s own standardized mean difference was 3 *
+sqrt(2/20), about 0.949. Each planner names the row for its metric
+(<code>f_planning</code> for Cohen’s <em>f</em> in the ANOVA planners,
+<code>rho_planning</code> for a correlation, and so on);
+<code>vignette(&quot;reading-output&quot;, package = &quot;BUCSS&quot;)</code> lists
+them.</p>
+<p>The unit the sample size is counted in depends on the design (per
+group, per cell, number of pairs, or total): the size row is named
+accordingly (<code>necessary_n_per_group</code>,
+<code>necessary_n_per_cell</code>, or <code>necessary_N</code>), and the
+unit also travels on the object so you never have to guess:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">attr</span>(result, <span class="st">&quot;sample_size_unit&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;per group&quot;</span></span></code></pre></div>
+<p>For programmatic use the broom verbs give the convenient views.
+<code>tidy()</code> returns the compact estimate view
+(<code>term</code>, <code>estimate</code>, and <code>power</code>: the
+sample size and its achieved power), as the <strong>DMAR</strong>
+package’s sample size planners do, and <code>glance()</code> returns the
+one-row wide view, which begins with those same three columns and then
+keeps every row of the result as a column.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="fu">tidy</span>(result)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="co">#&gt;          term estimate     power</span></span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a><span class="co">#&gt; 1 sample_size      130 0.8014476</span></span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a><span class="fu">tidy</span>(result)<span class="sc">$</span>estimate</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co">#&gt; [1] 130</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a><span class="fu">glance</span>(result)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a><span class="co">#&gt;          term estimate     power necessary_n_per_group total_N actual_power</span></span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a><span class="co">#&gt; 1 sample_size      130 0.8014476                   130     260    0.8014476</span></span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="co">#&gt;   ncp_adjusted smd_planning t_observed  n alpha_prior alpha_planned assurance</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt; 1     1.105023    0.3494388          3 20        0.05          0.05       0.8</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt;   desired_power             design sample_size_unit df_effect df_error</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; 1           0.8 Independent t test        per group         1      258</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt;   assurance_ceiling</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a><span class="co">#&gt; 1         0.9050734</span></span></code></pre></div>
+<p>For a manuscript’s method section, <code>planning_sentence()</code>
+writes the sentence:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">planning_sentence</span>(result)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;A planned study with 130 participants per group (total N = 260) attains 80% power with 80% assurance, after correcting the prior study&#39;s result for publication bias (assuming its literature published results significant at the .05 level) and for uncertainty. The plan is built on a planning effect size of 0.349, expressed as a standardized mean difference.&quot;</span></span></code></pre></div>
+</div>
+<div id="the-replication-example" class="section level2">
+<h2>The Replication Example</h2>
+<p>When the prior study has unequal group sizes, you can pass both. Here
+a prior study reported <em>t</em> = 3.00 with group sizes of 50 and 55,
+and we ask for 90% assurance:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>replication <span class="ot">&lt;-</span> <span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="fu">c</span>(<span class="dv">50</span>, <span class="dv">55</span>),</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>                                    <span class="at">alpha_prior =</span> .<span class="dv">05</span>, <span class="at">alpha_planned =</span> .<span class="dv">05</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>                                    <span class="at">desired_power =</span> .<span class="dv">80</span>, <span class="at">assurance =</span> .<span class="dv">90</span>)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>replication</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">term</th>
+<th align="left">value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">necessary_n_per_group</td>
+<td align="left">1485</td>
+</tr>
+<tr class="even">
+<td align="left">total_N</td>
+<td align="left">2970</td>
+</tr>
+<tr class="odd">
+<td align="left">actual_power</td>
+<td align="left">0.803</td>
+</tr>
+<tr class="even">
+<td align="left">ncp_adjusted</td>
+<td align="left">0.526</td>
+</tr>
+<tr class="odd">
+<td align="left">smd_planning</td>
+<td align="left">0.103</td>
+</tr>
+<tr class="even">
+<td align="left">t_observed</td>
+<td align="left">3</td>
+</tr>
+<tr class="odd">
+<td align="left">n_1</td>
+<td align="left">50</td>
+</tr>
+<tr class="even">
+<td align="left">n_2</td>
+<td align="left">55</td>
+</tr>
+<tr class="odd">
+<td align="left">alpha_prior</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="even">
+<td align="left">alpha_planned</td>
+<td align="left">0.05</td>
+</tr>
+<tr class="odd">
+<td align="left">assurance</td>
+<td align="left">0.9</td>
+</tr>
+<tr class="even">
+<td align="left">desired_power</td>
+<td align="left">0.8</td>
+</tr>
+</tbody>
+</table>
+<p>Design: Independent t test; Sample size unit: per group; Largest
+supportable assurance: .93</p>
+<p>The corrected plan calls for 1485 per group, a vivid illustration of
+how much publication bias and uncertainty can inflate the sample size
+needed for a dependable replication. The published standardized mean
+difference was 3 * sqrt(1/50 + 1/55), about 0.586, while the plan is
+built on a planning effect size of 0.103: at 90% assurance, after
+allowing for publication at the .05 level, that is the effect the
+replication must be powered to detect. BUCSS 1.x reported 1482 for this
+example under its grid search; as of BUCSS 2.0.0 the adjusted
+noncentrality parameter is found by direct root finding, which gives
+1485.</p>
+</div>
+<div id="when-the-prior-result-is-not-enough" class="section level2">
+<h2>When the Prior Result Is Not Enough</h2>
+<p>The correction can also decline to plan. The prior study of the first
+example supports assurance up to about .90, the value its printed footer
+reports; ask for .95 and the function stops rather than returning a
+meaningless number, and its message says how far to step back:</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">ss_buc_independent_t</span>(<span class="at">t_observed =</span> <span class="dv">3</span>, <span class="at">n =</span> <span class="dv">20</span>, <span class="at">assurance =</span> .<span class="dv">95</span>)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; Error:</span></span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; ! Sample size planning is not possible with these settings. After correcting the prior study&#39;s effect for publication bias and uncertainty at the requested level of assurance, the corrected noncentrality parameter is zero, which means there is not enough information in the prior result to plan the sample size as desired. With this prior result and &#39;alpha_prior&#39;, the largest &#39;assurance&#39; that still yields a usable plan is about .90; re-run with &#39;assurance&#39; at or below that value, or raise &#39;alpha_prior&#39; to lift the ceiling. Re-running at a lower &#39;assurance&#39; is not free: the plan it returns carries that lower assurance, not the one you first asked for, so the long run proportion of replications reaching your target power falls accordingly. &#39;alpha_prior&#39; does not change the prior study, which is what it is; it is your assumption about the publication threshold the study&#39;s literature faced, so raising it toward 1 assumes less publication bias to undo (for example, &#39;alpha_prior = .10&#39; assumes the literature&#39;s journals would have published a result significant at the .10 level, a more lenient policy than .05, and &#39;alpha_prior = 1&#39; assumes no publication bias at all). See Anderson, Kelley, and Maxwell (2017) and Anderson and Kelley (2024).</span></span></code></pre></div>
+<p><code>vignette(&quot;understanding-assurance&quot;, package = &quot;BUCSS&quot;)</code>
+explains where that ceiling comes from and draws it.</p>
+</div>
+<div id="the-function-family" class="section level2">
+<h2>The Function Family</h2>
+<p>BUCSS covers eighteen designs, one function per analysis. Each
+summarizes the prior study with a single test statistic plus the
+design.</p>
+<table>
+<colgroup>
+<col width="27%" />
+<col width="27%" />
+<col width="45%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>Analysis</th>
+<th>Prior statistic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ss_buc_one_sample_t</code></td>
+<td>one-sample <em>t</em> test</td>
+<td><code>t_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_independent_t</code> (alias
+<code>ss_buc_smd</code>)</td>
+<td>independent <em>t</em> test / standardized mean difference</td>
+<td><code>t_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_paired_t</code> (alias
+<code>ss_buc_smd_paired</code>)</td>
+<td>dependent (paired) <em>t</em> test</td>
+<td><code>t_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_welch_t</code></td>
+<td>Welch (unequal variance) <em>t</em> test</td>
+<td><code>t_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_one_way_anova</code></td>
+<td>one-way between-subjects ANOVA</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_factorial_anova</code></td>
+<td>two-way between-subjects ANOVA</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_factorial_anova_general</code></td>
+<td>between-subjects ANOVA, any factors or contrast</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_ancova</code></td>
+<td>analysis of covariance</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_rm_anova</code></td>
+<td>within-subjects ANOVA (one-way or two-way)</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_rm_anova_general</code></td>
+<td>within-subjects ANOVA, any factors</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_mixed_anova</code></td>
+<td>split-plot (mixed) ANOVA</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_mixed_anova_general</code></td>
+<td>split-plot ANOVA, any factors</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_correlation</code></td>
+<td>Pearson correlation</td>
+<td><code>r_observed</code> (or <code>t_observed</code>)</td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_reg_coef</code></td>
+<td>single regression coefficient</td>
+<td><code>t_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_R2</code></td>
+<td>omnibus model R-squared</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_reg_joint</code></td>
+<td>joint test of a subset of predictors</td>
+<td><code>F_observed</code></td>
+</tr>
+<tr class="odd">
+<td><code>ss_buc_manova</code></td>
+<td>two-group multivariate comparison (Hotelling <em>T</em>
+squared)</td>
+<td><code>F_observed</code> (or <code>T2_observed</code>)</td>
+</tr>
+<tr class="even">
+<td><code>ss_buc_chisq_diff</code></td>
+<td>nested model chi square difference test</td>
+<td><code>chisq_observed</code></td>
+</tr>
+</tbody>
+</table>
+<p>Two further functions take a finished plan from any of these
+planners:</p>
+<table>
+<colgroup>
+<col width="41%" />
+<col width="58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Function</th>
+<th>What it does</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ss_buc_sensitivity()</code></td>
+<td>audits the plan by simulation: from a true effect you name, how
+often a plan built this way reaches the target power</td>
+</tr>
+<tr class="even">
+<td><code>plot()</code></td>
+<td>draws the plan’s assurance ceiling: the corrected noncentrality
+parameter and the sample size as assurance rises toward the largest
+value the prior result supports</td>
+</tr>
+</tbody>
+</table>
+<p>See <code>vignette(&quot;worked-examples&quot;, package = &quot;BUCSS&quot;)</code> for
+one worked example of each planner,
+<code>vignette(&quot;understanding-assurance&quot;, package = &quot;BUCSS&quot;)</code> for
+how the <code>assurance</code> and <code>alpha_prior</code> settings
+shape the correction,
+<code>vignette(&quot;reading-output&quot;, package = &quot;BUCSS&quot;)</code> for the
+print, <code>tidy()</code>, and <code>glance()</code> views of the
+result, <code>vignette(&quot;correlation&quot;, package = &quot;BUCSS&quot;)</code> for why
+a correlation study needs its own planner and how
+<code>ss_buc_sensitivity()</code> audits a plan, and
+<code>vignette(&quot;planning-replications&quot;, package = &quot;BUCSS&quot;)</code> for a
+worked demonstration of why a literature of underpowered studies
+misleads and how the correction repairs the replication sample size.</p>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<p>Anderson, S. F., &amp; Kelley, K. (2024). Sample size planning for
+replication studies: The devil is in the design. <em>Psychological
+Methods, 29</em>, 844–867. <a href="https://doi.org/10.1037/met0000520" class="uri">https://doi.org/10.1037/met0000520</a></p>
+<p>Anderson, S. F., Kelley, K., &amp; Maxwell, S. E. (2017). Sample-size
+planning for more accurate statistical power: A method adjusting sample
+effect sizes for publication bias and uncertainty. <em>Psychological
+Science, 28</em>, 1547–1562. <a href="https://doi.org/10.1177/0956797617723724" class="uri">https://doi.org/10.1177/0956797617723724</a></p>
+<p>Taylor, D. J., &amp; Muller, K. E. (1996). Bias in linear model power
+and sample size calculation due to estimating noncentrality.
+<em>Communications in Statistics: Theory and Methods, 25</em>,
+1595–1610. <a href="https://doi.org/10.1080/03610929608831787" class="uri">https://doi.org/10.1080/03610929608831787</a></p>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
